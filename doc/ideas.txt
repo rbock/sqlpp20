@@ -1,0 +1,333 @@
+Call cmake with something like 
+
+cmake ../ -DCMAKE_CXX_COMPILER=/usr/local/clang-trunk/bin/clang++ -DCMAKE_CXX_FLAGS='-stdlib=libc++'
+
+
+
+
+Checking for unique names in the the list of selected columns, makes no sense. The compiler does that for you (and produces error messages that tools can deal with).
+
+sql_cast does not check if the type can actually be casted to (treats it like a reinterpret cast)
+
+The sqlpp11 connector for sqlite3 has additional functions:
+
+  - auto attach(const connection_config&, const std::string name) -> schema_t;
+  - auto set_default_isolation_level(isolation_level level) -> void;
+  - auto get_default_isolation_level() -> isolation_level;
+
+While these functions are probably too specific, it would be good to offer the ability to execute arbitrary strings and obtain results from that.
+Also for other connectors.
+
+Drop multi_column. It makes a lot of things horribly complex (like result binding, or how to treat a result row as a tuple (e.g. is it a flat tuple or a nested one))? It probably never worked for prepared statements in sqlpp11, and it is for a super duper edge case only.
+
+Results of prepared statements:
+===============================
+There are two types:
+  - mysql and sqlite3 allow just one result per statement.
+  - postgresql allows any number of results per statement (results can outlive the prepared statement or even the connection)
+
+sqlite3 requires the prepare-step.
+
+Plan:
+=====
+               Direct                                             Prepared
+    mysql      result object                                      result object that refers to the prepared statement
+               (there can be multiple per connection)             (there can be only one at a time and it cannot outlive the
+                                                                   prepared statement, which cannot outlive the connection)
+    sqlite3    result object that stores                          result object that just refers to the prepared statement
+               the prepared statement                             (there can be only one at a time and it cannot outlive the
+               (there can be only one live result per connection   prepared statement, which cannot outlive the connection)
+    postgresql result object                                      result object
+               (can outlive the connection)                       (can outlive the connection)
+
+Actually, the more I think about this:
+Maybe `prepared_statement` should not be a real thing in sqlpp20. It could be more of a concept (or maybe a metaclass in C++23).
+Results generally could not be things in sqlpp20. The current required ping-pong between sqlpp and the connector is pretty hard to trace.
+
+Dead prepared statements:
+========================
+If the server gets restarted, any prepared statements will become invalidated (also, the connection will be dead at this point).
+See https://github.com/rbock/sqlpp11/issues/320
+
+
+Other prepared statement topics:
+================================
+debugging every bound value is nonsense
+
+The connection doe not hold on to the config. Thus, it cannot call a callback in the destructor
+
+(posix reserves _t suffixes)
+
+Get rid of the string-execute. Add some string-to-statement-function
+
+sqlite3 cannot bind NaN to double.
+
+
+multi-line inserts require at least one line. That is part of the contract. The library is not required to do the check.
+If the user provides zero lines, it is a usage error.
+
+
+USE SANITIZERS!
+===============
+cmake .. -DCMAKE_CXX_COMPILER=/usr/local/clang-trunk/bin/clang++          -DCMAKE_CXX_FLAGS='-std=c++17 -stdlib=libc++ -fcolor-diagnostics -Wall -Wpedantic -fsanitize=memory -fno-omit-frame-pointer -O1 -g -fsanitize-memory-track-origins -fno-optimize-sibling-calls -fsanitize-blacklist=/home/rbock/projects/sqlpp20/build/blacklist.txt'
+cmake .. -DCMAKE_CXX_COMPILER=/usr/local/clang-trunk/bin/clang++          -DCMAKE_CXX_FLAGS='-std=c++17 -stdlib=libc++ -fcolor-diagnostics -Wall -Wpedantic -fsanitize=address -O1 -g'
+cmake .. -DCMAKE_CXX_COMPILER=/usr/local/clang-trunk/bin/clang++          -DCMAKE_CXX_FLAGS='-std=c++17 -stdlib=libc++ -fcolor-diagnostics -Wall -Wpedantic -fsanitize=thread -O1 -g'
+...
+
+export MSAN_SYMBOLIZER_PATH=/usr/local/clang-trunk/bin/llvm-symbolizer
+
+float:
+=====
+need a way to deal with NaN or +-inf.
+
+This is really annoying.
+MySQL does not have support for non-finite values.
+sqlite3 accepts anything in any column, including strings for REAL values (e.g. 'NaN', '+Inf', '-Inf'), but well, those would be strings then (in a REAL column).
+Postgresql actually knows 'NaN', 'Infinity' and '-Infinity' but only if there is a real or double precision operand next to the value. NUMERIC does not work with any of the special values.
+As of now, the postgresql connector uses strings for binding.
+
+MySQL and sqlite use binary bindings for prepared statements. Need to run tests if those work OK.
+
+transaction isolation levels:
+=================
+Make them configurable?
+Make them read/write in connections?
+
+Do not set them in the transaction (as in sqlpp11-connector-sqlite3), that would violate separation of duties.
+
+table_alias and CTE:
+====================
+ - Using just the name_tag to identify the table in column_t is too little information
+ - Using the full underlying table type is too much.
+
+Use the name_tag plus a hash of the underlying table. That should give enough safety.
+
+tags:
+=====
+Instead of no_insert and no_update, use auto_increment.
+Instead of has_default: Specify the default value.
+
+The required information can be extracted from the new values.
+In addition, it should be possible to start writing `create table` calls.
+
+Dynamic queries:
+================
+*) Dynamic tables, columns, queries:
+As mentioned before, this is not the main focus of the library, but the last few weeks have created a new opportunity for this. I actually realized this when reading your mail:
+
+You can now introduce new data types very easily (much easier than in sqlpp11). With a couple of meta functions and a bit of code in the connector library you're ready to go.
+
+Then, instead of saying this column is of type int64_t, you could say, it is of type std::variant<in64_t, std::string_view, date, time, etc>.
+
+This would make the use of this column very flexible, but of course, the burden to make sure that you do not compare apples and oranges would be your task :-)
+
+This leads to an interesting thought: A dynamic table in basically be a map of name<->variant_column.
+
+case_when:
+==========
+sqlpp11 tries to be clever with NULL: if a column x was marked as trivial_is_null and you said
+x == 0, it translates this into x IS NULL.
+
+If you really are in that situation, you could say
+
+case_when(q == 0).then(x.is_null()).else_(x == q)
+
+Or you might want to say
+
+case_when(cond).then(x == q).else_(true)
+
+What about x == std::nullopt?
+=============================
+x == NULL is always false, even if `x IS NULL`
+
+Value types:
+============
+sqlpp11 has types like integral, text, boolean, etc. The library needs to define in much detail
+how these types interact.
+
+sqlpp20 simply uses whatever type you want.
+
+to_string instead of operator<<
+===============================
+Might be faster (no funny stream buffering).
+Certainly easier to use (string streams in particular need to be cleaned before re-use, which has proven to be annoying in testing)
+
+
+Selectable:
+===========
+operators +-/*% are must not be in selectable expressions. That avoids all the type nonsense, i.e. what is the value type of adding two ints? int? long? SQL says long, C++ says int, for instance.
+
+Member functions:
+=================
+like, is_null, is_not_null, in, not_in:
+
+Three options:
+  - create some CRTP base class that offers such functions
+	  drawback: Inheritance.
+  - make them free functions in general
+	  This has the drawback that the syntax looks unfamiliar in comparison to SQL
+	- make them member functions of column and some transparent expr-wrapper.
+	  This way, we do not have to inherit all operators into all expressions.
+
+Well, that should be an easy decision :-)
+
+char:
+=====
+How to serialize char? integral or character?
+
+I tend to consider char = text
+
+
+Columns and tables:
+===================
+#warning: To check if all columns are correct, we should compare provided and required columns
+#warning: (column being defined by TableSpec and ColumnSpec).
+
+Difficult decision:
+Tables and alias tables are defined by name and columns.
+Columns /could/ be defined by tables and column specifications.
+In that case they could uniquely identified. However, it would require
+columns types to contain the table type, which contains all column
+specifications.
+Thus, `select(all_of(tab))` would contain all columns, each of which
+would contain all column specs. This is quadratic in the number of
+columns. That seems non-sustainable.
+
+It seems more reasonable to just store the tables spec in the column
+type and then look for required and provided columns.
+
+Now, this would allow for
+
+```
+select(foo.id).from(bar.as(foo))
+```
+
+if `bar` happens to have an `id` column like `foo`.
+
+While this construed example looks bad, I believe it is rather unlikely to happen.
+I am therefore willing to risk that in favor of quadraticly growing type names.
+
+
+No "dynamic_select" et al.
+==========================
+For dynamically selected columns, we can use optional, see below.
+For dynamically joined tables, we can use optional, too.
+For dynamic conditions, we can
+  - use variants of true_type and some boolean expression
+	  (optional is not useful here, because `A and NULL` should be what is expected in SQL: NULL
+	- serialize stuff to strings with value types to join expressions together at will.
+
+vector of variants, pros and cons:
+----------------------------------
+There was the idea of dynamically selecting columns using a vector of variants of potential candidate columns.
+
+We could add any number of these in a vector.
+
+Pros:
+- we could dynamically select ANY number of columns
+- we could use ANY name
+- access in vector or map pattern
+
+Cons:
+- very different interface from the static one
+- values need to be anonymized (type-erased) -> statement cannot be used for more than one db
+- we could get index/name wrong when obtaining results
+- we could get the type wrong (bad_variant exception)
+
+Using optional for those things that are optional but static in nature:
+-----------------------------------------------------------------------
+Columns can be optional in a select, but they themselves are static.
+Tables can be optional in a join, but they themselves are static.
+
+Most of the time, anyway.
+
+Thus, we could say something like :
+
+    select(t.foo, wantBar ? f.bar : std::nullopt))
+        .from(t.join(wantBar ? f : std::nullopt).on(t.fId = f.id)))
+        .unconditionally();
+
+All compile time checks are made as if all conditionals actually hold a value.
+Optional columns will always yield NULL (no database interaction).
+Optional joins will not be serialized
+
+providing flags and columns:
+============================
+select(all_of(t)).flags(sqlpp::distinct)...
+
+or
+
+select(sqlpp::distinct).columns(all_of(t))...
+
+or
+
+select().flags(sqlpp::distinct).columns(all_of(t))...
+
+The nicest way would still be to just say
+
+select(sqlpp::distinct, all_of(t))...
+
+That also happens to be the hardest way to do it (haven't found a nice solution yet)
+
+row.x should be a value/optional, not a complex object.
+=======================================================
+auto x = row.x leads to too many surprises
+
+results.front() needs to throw is results.empty()
+=================================================
+It happens way too often that someone assumes that there is at least one result, when there isn't
+
+Instead of having a "custom_statement", combine statements with operator<< or similar
+
+Braces:
+=======
+Use braces only if needed, e.g. not for "x and y and z" but for "(x or y) and z". Same with +-*/.
+
+Actually, quite simple: no braces for chaining "same" operators, any other combination requires braces.
+
+Invert the logic from sqlpp11: Instead of expressions writing braces for themselves, request braces for subexpressions where they might be required.
+
+TrivialIsNull:
+==============
+This was one of the most controversial ideas in sqlpp11.
+
+Today, I agree with the critics: this requires the library to do so much "magic", it is just confusing.
+
+Custom statements:
+==================
+These can be created trivially by concatenating sub-statements.
+
+Union:
+======
+"merge" field specs: if left can be null while right cannot, then union can be null
+union() takes two or more select statements (the member function could forward to a free function)
+
+CTE:
+====
+CTEs can be self-referential. In order to do that, we need to know the columns of a CTE.
+
+Thus, we need to create the non-recursive part first and then union-all with the second part.
+
+
+MYSQL:
+======
+MySQL requires three resources to be managed:
+
+a) mysql_library_init/mysql_library_end:
+   These are not thread safe.
+	 => Provide an RAII struct that can be used as a global static
+	 => Even better: Provide a function with a static member that initializes that RAII struct
+b) mysql_thread_init/mysql_thread_end
+   These must be called once per thread
+	 => Offer thread local storage raii (this would be the default)
+	 => Offer a way to turn off the thread local storage raii
+c) new/delete MYSQL, mysql_init/mysql_close
+   => offer a connection raii object
+
+Offer a connection_view which takes a MYSQL connection pointer and assumes that it is initialized and threading is taken care of.
+
+
+Auto-reconnect needs to be turned off by default. It is just too crazy.
+Transactions are lost, session settings are lost, prepared statements are lost
+see https://dev.mysql.com/doc/refman/5.7/en/c-api-auto-reconnect.html
+
