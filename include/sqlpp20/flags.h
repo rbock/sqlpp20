@@ -36,7 +36,7 @@ template <typename Context>
 
 struct all_t {};
 
-constexpr auto all = all_t{};
+inline constexpr auto all = all_t{};
 
 template <typename Context>
 [[nodiscard]] auto to_sql_string(Context& context, const all_t& t) {
@@ -45,7 +45,7 @@ template <typename Context>
 
 struct distinct_t {};
 
-constexpr auto distinct = distinct_t{};
+inline constexpr auto distinct = distinct_t{};
 
 template <typename Context>
 [[nodiscard]] auto to_sql_string(Context& context, const distinct_t& t) {

@@ -691,4 +691,23 @@ struct is_cte_recursive : std::false_type {};
 template <typename T>
 inline constexpr auto is_cte_recursive_v = is_cte_recursive<T>::value;
 
+template <typename T>
+constexpr auto has_name_v = not std::is_same_v<name_tag_of_t<T>, none_t>;
+
+// Concepts
+template <typename T>
+concept Expression = is_expression_v<T>;
+
+template <typename T>
+concept Named = has_name_v<T>;
+
+template <typename T>
+concept Table = is_table_v<T>;
+
+template <typename T>
+concept OptionalTable = is_table_v<remove_optional_t<T>>;
+
+template <typename T>
+concept PrimaryTable = is_table_v<T> and not is_join_v<T> and not is_cte_v<T> and not is_read_only_v<T>;
+
 }  // namespace sqlpp

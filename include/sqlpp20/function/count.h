@@ -33,24 +33,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/wrapped_static_assert.h>
 
 namespace sqlpp {
-SQLPP_WRAPPED_STATIC_ASSERT(assert_count_arg_is_expression,
-                            "count() arg must be a value expression");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_count_arg_is_not_alias,
-                            "count() arg must not be an alias");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_count_arg_is_not_aggregate,
-                            "count() arg must not be an aggregate");
+struct asterisk_t {};
+inline constexpr auto asterisk = asterisk_t{};
 
-template <typename Expression>
-constexpr auto check_count_args() {
-  if constexpr (not is_expression_v<Expression> and
-                not std::is_integral_v<Expression>) {
-    return failed<assert_count_arg_is_expression>{};
-  } else if constexpr (is_alias_v<Expression>) {
-    return failed<assert_count_arg_is_not_alias>{};
-  } else if constexpr (::sqlpp::is_aggregate_v<Expression>) {
-    return failed<assert_count_arg_is_not_aggregate>{};
-  } else
-    return succeeded{};
+template <typename Context>
+[[nodiscard]] auto to_sql_string(Context& context, const asterisk_t& t) {
+  return std::string{"*"};
 }
 
 template <typename Flag>
@@ -60,25 +48,22 @@ struct count_t {
   using value_type = int64_t;
 };
 
-template <typename Expression>
-[[nodiscard]] constexpr auto count(Expression expression) {
-  if constexpr (constexpr auto _check = check_count_args<Expression>();
-                _check) {
-    return aggregate_t<count_t<no_flag_t>, Expression>{expression};
-  } else {
-    return ::sqlpp::bad_expression_t{_check};
-  }
+template <Expression Expr>
+requires(not is_alias_v<Expr> and not is_aggregate_v<Expr>)
+[[nodiscard]] constexpr auto count(Expr expr) {
+    return aggregate_t<count_t<no_flag_t>, Expr>{expr};
 }
 
-template <typename Expression>
+template <Expression Expr>
+requires(not is_alias_v<Expr> and not is_aggregate_v<Expr>)
 [[nodiscard]] constexpr auto count([[maybe_unused]] distinct_t,
-                                   Expression expression) {
-  if constexpr (constexpr auto _check = check_count_args<Expression>();
-                _check) {
-    return aggregate_t<count_t<distinct_t>, Expression>{expression};
-  } else {
-    return ::sqlpp::bad_expression_t{_check};
-  }
+                                   Expr expr) {
+    return aggregate_t<count_t<distinct_t>, Expr>{expr};
+}
+
+// COUNT does not count NULL unless used with *
+[[nodiscard]] constexpr auto count(asterisk_t star) {
+    return aggregate_t<count_t<no_flag_t>, asterisk_t>{star};
 }
 
 }  // namespace sqlpp

@@ -34,35 +34,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <type_traits>
 
 namespace sqlpp {
-SQLPP_WRAPPED_STATIC_ASSERT(assert_first_as_arg_is_expression,
-                            "as() first arg must be a value expression");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_first_as_arg_is_not_alias,
-                            "as() first arg must not be an alias");
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_second_as_arg_is_name_tag_or_similar,
-    "as() second arg must be a named expression (e.g. column, table), or a "
-    "column/table spec, or a name tag");
-
-template <typename Expr, typename Tag>
-constexpr auto check_as_args() {
-  if constexpr (not is_expression_v<Expr>) {
-    return failed<assert_first_as_arg_is_expression>{};
-  } else if constexpr (is_alias_v<Expr>) {
-    return failed<assert_first_as_arg_is_not_alias>{};
-  } else if constexpr (std::is_same_v<name_tag_of_t<Tag>, none_t>) {
-    return failed<assert_second_as_arg_is_name_tag_or_similar>{};
-  } else
-    return succeeded{};
-}
-
-template <typename Expr, typename NamedTypeOrTag>
-[[nodiscard]] constexpr auto as(Expr expr, const NamedTypeOrTag& tag) {
-  if constexpr (constexpr auto _check = check_as_args<Expr, NamedTypeOrTag>();
-                _check) {
-    return alias_t<Expr, name_tag_of_t<NamedTypeOrTag>>{expr};
-  } else {
-    return ::sqlpp::bad_expression_t{_check};
-  }
+template <Expression Expr, Named Tag>
+requires(not is_alias_v<Expr>)
+    [[nodiscard]] constexpr auto as(Expr expr, const Tag& tag) {
+    return alias_t<Expr, name_tag_of_t<Tag>>{expr};
 }
 
 }  // namespace sqlpp

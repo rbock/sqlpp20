@@ -33,25 +33,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/wrapped_static_assert.h>
 
 namespace sqlpp {
-SQLPP_WRAPPED_STATIC_ASSERT(assert_min_arg_is_expression,
-                            "min() arg must be a value expression");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_min_arg_is_not_alias,
-                            "min() arg must not be an alias");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_min_arg_is_not_aggregate,
-                            "min() arg must not be an aggregate");
-
-template <typename Expression>
-constexpr auto check_min_args() {
-  if constexpr (not is_expression_v<Expression>) {
-    return failed<assert_min_arg_is_expression>{};
-  } else if constexpr (is_alias_v<Expression>) {
-    return failed<assert_min_arg_is_not_alias>{};
-  } else if constexpr (::sqlpp::is_aggregate_v<Expression>) {
-    return failed<assert_min_arg_is_not_aggregate>{};
-  } else
-    return succeeded{};
-}
-
 template <typename ValueType>
 struct min_t {
   static constexpr auto name = std::string_view{"MIN"};
@@ -59,14 +40,11 @@ struct min_t {
   using value_type = ValueType;
 };
 
-template <typename Expression>
-[[nodiscard]] constexpr auto min(Expression expression) {
-  if constexpr (constexpr auto _check = check_min_args<Expression>(); _check) {
-    return aggregate_t<min_t<value_type_of_t<Expression>>, Expression>{
-        expression};
-  } else {
-    return ::sqlpp::bad_expression_t{_check};
-  }
+template <Expression Expr>
+requires(not is_alias_v<Expr> and not is_aggregate_v<Expr>)
+[[nodiscard]] constexpr auto min(Expr expr) {
+    return aggregate_t<min_t<value_type_of_t<Expr>>, Expr>{
+        expr};
 }
 
 }  // namespace sqlpp

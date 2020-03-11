@@ -32,77 +32,46 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/type_traits.h>
 
 namespace sqlpp {
-template <typename Table>
+template <typename Tab>
 struct delete_from_t {};
 
-template <typename Table>
-struct nodes_of<delete_from_t<Table>> {
-  using type = type_vector<Table>;
+template <typename Tab>
+struct nodes_of<delete_from_t<Tab>> {
+  using type = type_vector<Tab>;
 };
 
-template <typename Table>
-constexpr auto clause_tag<delete_from_t<Table>> =
+template <typename Tab>
+constexpr auto clause_tag<delete_from_t<Tab>> =
     ::std::string_view{"delete_from"};
 
-SQLPP_WRAPPED_STATIC_ASSERT(assert_delete_from_arg_is_table,
-                            "delete_from() arg has to be a table");
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_delete_from_arg_no_join,
-    "delete_from() arg must not depend on other tables");
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_delete_from_arg_no_cte,
-    "delete_from() arg must not depend on other tables");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_delete_from_arg_no_read_only_table,
-                            "delete_from() arg must not be read-only table");
-
-template <typename T>
-constexpr auto check_delete_from_arg() {
-  if constexpr (!is_table_v<T>) {
-    return failed<assert_delete_from_arg_is_table>{};
-  } else if constexpr (is_join_v<T>) {
-    return failed<assert_delete_from_arg_no_join>{};
-  } else if constexpr (is_cte_v<T>) {
-    return failed<assert_delete_from_arg_no_cte>{};
-  } else if constexpr (is_read_only_v<T>) {
-    return failed<assert_delete_from_arg_no_read_only_table>{};
-  } else {
-    return succeeded{};
-  }
-}
-
-template <typename Table, typename Statement>
-class clause_base<delete_from_t<Table>, Statement> {
+template <typename Tab, typename Statement>
+class clause_base<delete_from_t<Tab>, Statement> {
  public:
   template <typename OtherStatement>
-  clause_base(const clause_base<delete_from_t<Table>, OtherStatement>& t)
+  clause_base(const clause_base<delete_from_t<Tab>, OtherStatement>& t)
       : _table(t._table) {}
 
-  clause_base(Table table) : _table(table) {}
+  clause_base(Tab tab) : _table(tab) {}
 
-  Table _table;
+  Tab _table;
 };
 
-template <typename Table>
-constexpr auto is_result_clause_v<delete_from_t<Table>> = true;
+template <typename Tab>
+constexpr auto is_result_clause_v<delete_from_t<Tab>> = true;
 
-template <typename Table>
-struct clause_result_type<delete_from_t<Table>> {
+template <typename Tab>
+struct clause_result_type<delete_from_t<Tab>> {
   using type = delete_result;
 };
 
-template <typename Context, typename Table, typename Statement>
+template <typename Context, typename Tab, typename Statement>
 [[nodiscard]] auto to_sql_string(
-    Context& context, const clause_base<delete_from_t<Table>, Statement>& t) {
+    Context& context, const clause_base<delete_from_t<Tab>, Statement>& t) {
   return std::string{"DELETE FROM "} + to_sql_string(context, t._table);
 }
 
-template <typename Table>
-[[nodiscard]] constexpr auto delete_from(Table table) {
-  if constexpr (constexpr auto _check = check_delete_from_arg<Table>();
-                _check) {
-    return statement<delete_from_t<Table>>{table} << statement<no_where_t>{};
-  } else {
-    return bad_expression_t{_check};
-  }
+template <PrimaryTable Tab>
+[[nodiscard]] constexpr auto delete_from(Tab tab) {
+    return statement<delete_from_t<Tab>>{tab} << statement<no_where_t>{};
 }
 }  // namespace sqlpp

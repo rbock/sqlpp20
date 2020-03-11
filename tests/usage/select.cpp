@@ -71,13 +71,13 @@ int main() {
   }
 
   for (const auto& row :
-       db(select(::sqlpp::count(1).as(rowCount),
+       db(select(::sqlpp::count(sqlpp::asterisk).as(rowCount),
                  max(tabPerson.name).as(maxName), avg(tabPerson.id).as(avgId),
                  tabPerson.isManager)
               .from(tabPerson)
               .where(tabPerson.isManager and tabPerson.name != "")
               .group_by(tabPerson.isManager)
-              .having(::sqlpp::count(1) > 7)
+              .having(::sqlpp::count(sqlpp::asterisk) > 7)
               .order_by(asc(max(tabPerson.id)))
               .limit(1)
               .offset(1))) {
@@ -91,12 +91,12 @@ int main() {
   // using << concatenation
   for (const auto& row :
        db(::sqlpp::select()
-          << select_columns(::sqlpp::count(1).as(rowCount),
+          << select_columns(::sqlpp::count(sqlpp::asterisk).as(rowCount),
                             max(tabPerson.name).as(maxName),
                             avg(tabPerson.id).as(avgId), tabPerson.isManager)
           << from(tabPerson)
           << where(tabPerson.isManager and tabPerson.name != "")
-          << group_by(tabPerson.isManager) << having(::sqlpp::count(1) > 7)
+          << group_by(tabPerson.isManager) << having(::sqlpp::count(sqlpp::asterisk) > 7)
           << order_by(asc(max(tabPerson.id))))) {
     std::cout << row.rowCount << std::endl;
     std::cout << row.maxName << std::endl;

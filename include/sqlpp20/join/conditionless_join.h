@@ -50,7 +50,7 @@ constexpr auto check_join() {
 }
 }  // namespace detail
 
-template <typename Lhs, typename JoinType, typename Rhs>
+template <Table Lhs, typename JoinType, OptionalTable Rhs>
 class conditionless_join_t {
  public:
   constexpr conditionless_join_t(Lhs lhs, JoinType, Rhs rhs)

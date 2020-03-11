@@ -33,25 +33,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/wrapped_static_assert.h>
 
 namespace sqlpp {
-SQLPP_WRAPPED_STATIC_ASSERT(assert_avg_arg_is_numeric,
-                            "avg() arg must be a numeric expression");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_avg_arg_is_not_alias,
-                            "avg() arg must not be an alias");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_avg_arg_is_not_aggregate,
-                            "avg() arg must not be an aggregate");
-
-template <typename Expression>
-constexpr auto check_avg_args() {
-  if constexpr (not has_numeric_value_v<Expression>) {
-    return failed<assert_avg_arg_is_numeric>{};
-  } else if constexpr (is_alias_v<Expression>) {
-    return failed<assert_avg_arg_is_not_alias>{};
-  } else if constexpr (::sqlpp::is_aggregate_v<Expression>) {
-    return failed<assert_avg_arg_is_not_aggregate>{};
-  } else
-    return succeeded{};
-}
-
 template <typename Flag>
 struct avg_t {
   static constexpr auto name = std::string_view{"AVG"};
@@ -59,23 +40,17 @@ struct avg_t {
   using value_type = double;
 };
 
-template <typename Expression>
-[[nodiscard]] constexpr auto avg(Expression expression) {
-  if constexpr (constexpr auto _check = check_avg_args<Expression>(); _check) {
-    return aggregate_t<avg_t<no_flag_t>, Expression>{expression};
-  } else {
-    return ::sqlpp::bad_expression_t{_check};
-  }
+template <Expression Expr>
+requires(has_numeric_value_v<Expr> and not is_alias_v<Expr> and not is_aggregate_v<Expr>)
+[[nodiscard]] constexpr auto avg(Expr expr) {
+  return aggregate_t<avg_t<no_flag_t>, Expr>{expr};
 }
 
-template <typename Expression>
+template <Expression Expr>
+requires(has_numeric_value_v<Expr> and not is_alias_v<Expr> and not is_aggregate_v<Expr>)
 [[nodiscard]] constexpr auto avg([[maybe_unused]] distinct_t,
-                                 Expression expression) {
-  if constexpr (constexpr auto _check = check_avg_args<Expression>(); _check) {
-    return aggregate_t<avg_t<distinct_t>, Expression>{expression};
-  } else {
-    return ::sqlpp::bad_expression_t{_check};
-  }
+                                 Expr expr) {
+  return aggregate_t<avg_t<distinct_t>, Expr>{expr};
 }
 
 }  // namespace sqlpp

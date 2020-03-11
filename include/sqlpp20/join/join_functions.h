@@ -32,15 +32,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/wrapped_static_assert.h>
 
 namespace sqlpp {
-template <typename Lhs, typename JoinType, typename Rhs>
+template <Table Lhs, typename JoinType, OptionalTable Rhs>
 class conditionless_join_t;
 
 namespace detail {
-template <typename JoinType, typename Lhs, typename Rhs>
+template <typename JoinType, Table Lhs, OptionalTable Rhs>
 requires(
-        is_table_v<Lhs> 
-        and is_table_v<remove_optional_t<Rhs>> 
-        and table_names_of_v<Lhs>.is_disjoint_from(table_names_of_v<remove_optional_t<Rhs>>)
+        table_names_of_v<Lhs>.is_disjoint_from(table_names_of_v<remove_optional_t<Rhs>>)
 #warning : The next two should be checked when turning a select into a table
         and not is_a_required_table_missing(provided_tables_of_v<Lhs>, type_t<Lhs>{}) 
         and not is_a_required_table_missing(provided_tables_of_v<Rhs>, type_t<Rhs>{}))
@@ -49,37 +47,35 @@ constexpr auto join_impl(Lhs lhs, Rhs rhs) {
 }
 }  // namespace detail
 
-template <typename Lhs, typename Rhs>
+template <Table Lhs, OptionalTable Rhs>
 [[nodiscard]] constexpr auto inner_join(Lhs lhs, Rhs rhs) {
   return detail::join_impl<inner_join_t>(lhs, rhs);
 }
 
-template <typename Lhs, typename Rhs>
+template <Table Lhs, OptionalTable Rhs>
 [[nodiscard]] constexpr auto join(Lhs lhs, Rhs rhs) {
   return inner_join(lhs, rhs);
 }
 
-template <typename Lhs, typename Rhs>
+template <Table Lhs, OptionalTable Rhs>
 [[nodiscard]] constexpr auto left_outer_join(Lhs lhs, Rhs rhs) {
   return detail::join_impl<left_outer_join_t>(lhs, rhs);
 }
 
-template <typename Lhs, typename Rhs>
+template <Table Lhs, OptionalTable Rhs>
 [[nodiscard]] constexpr auto right_outer_join(Lhs lhs, Rhs rhs) {
   return detail::join_impl<right_outer_join_t>(lhs, rhs);
 }
 
-template <typename Lhs, typename Rhs>
+template <Table Lhs, OptionalTable Rhs>
 [[nodiscard]] constexpr auto outer_join(Lhs lhs, Rhs rhs) {
   return detail::join_impl<outer_join_t>(lhs, rhs);
 }
 
 namespace detail {
-template <typename Lhs, typename Rhs>
+template <Table Lhs, OptionalTable Rhs>
 requires(
-        is_table_v<Lhs> 
-        and is_table_v<remove_optional_t<Rhs>> 
-        and table_names_of_v<Lhs>.is_disjoint_from(table_names_of_v<remove_optional_t<Rhs>>) 
+        table_names_of_v<Lhs>.is_disjoint_from(table_names_of_v<remove_optional_t<Rhs>>) 
 #warning : The next two should be checked when turning a select into a table
         and not is_a_required_table_missing(provided_tables_of_v<Lhs>, type_t<Lhs>{}) 
         and not is_a_required_table_missing(provided_tables_of_v<Rhs>, type_t<Rhs>{}))
@@ -88,7 +84,7 @@ constexpr auto cross_join_impl(Lhs lhs, Rhs rhs) {
 }
 }  // namespace detail
 
-template <typename Lhs, typename Rhs>
+template <Table Lhs, OptionalTable Rhs>
 [[nodiscard]] constexpr auto cross_join(Lhs lhs, Rhs rhs) {
   return detail::cross_join_impl(lhs, rhs);
 }
@@ -100,32 +96,32 @@ class join_functions {
   }
 
  public:
-  template <typename T>
+  template <OptionalTable T>
   [[nodiscard]] constexpr auto join(T t) const {
     return ::sqlpp::join(ref(), t);
   }
 
-  template <typename T>
+  template <OptionalTable T>
   [[nodiscard]] constexpr auto inner_join(T t) const {
     return ::sqlpp::inner_join(ref(), t);
   }
 
-  template <typename T>
+  template <OptionalTable T>
   [[nodiscard]] constexpr auto left_outer_join(T t) const {
     return ::sqlpp::left_outer_join(ref(), t);
   }
 
-  template <typename T>
+  template <OptionalTable T>
   [[nodiscard]] constexpr auto right_outer_join(T t) const {
     return ::sqlpp::right_outer_join(ref(), t);
   }
 
-  template <typename T>
+  template <OptionalTable T>
   [[nodiscard]] constexpr auto outer_join(T t) const {
     return ::sqlpp::outer_join(ref(), t);
   }
 
-  template <typename T>
+  template <OptionalTable T>
   [[nodiscard]] constexpr auto cross_join(T t) const {
     return ::sqlpp::cross_join(ref(), t);
   }
