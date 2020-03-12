@@ -136,25 +136,6 @@ template <typename Context, typename... Columns, typename Statement>
   return " " + tuple_to_sql_string(context, ", ", t._columns);
 }
 
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_select_columns_args_not_empty,
-    "select columns() must be called with at least one argument");
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_select_columns_args_are_selectable,
-    "select columns() args must be selectable (i.e. named expressions)");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_select_columns_args_have_unique_names,
-                            "select columns() args must have unique names");
-
-template <typename... T>
-constexpr auto check_select_columns_arg() {
-  if constexpr (sizeof...(T) == 0) {
-    return failed<assert_select_columns_args_not_empty>{};
-  } else if constexpr (!(true && ... && is_selectable_v<T>)) {
-    return failed<assert_select_columns_args_are_selectable>{};
-  } else
-    return succeeded{};
-}
-
 struct no_select_columns_t {};
 
 template <typename Statement>
@@ -166,27 +147,17 @@ class clause_base<no_select_columns_t, Statement> {
 
   constexpr clause_base() = default;
 
-  template <typename... Columns>
+  template <Selectable... Columns>
+  requires(sizeof...(Columns) > 0)
   [[nodiscard]] constexpr auto columns(Columns... columns) const {
-    if constexpr (constexpr auto _check =
-                      check_select_columns_arg<remove_optional_t<Columns>...>();
-                  _check) {
       return new_statement(
           *this, select_columns_t<Columns...>{std::tuple(columns...)});
-    } else {
-      return ::sqlpp::bad_expression_t{_check};
-    }
   }
 
-  template <typename... Columns>
+  template <Selectable... Columns>
+  requires(sizeof...(Columns) > 0)
   [[nodiscard]] constexpr auto columns(std::tuple<Columns...> columns) const {
-    if constexpr (constexpr auto _check =
-                      check_select_columns_arg<remove_optional_t<Columns>...>();
-                  _check) {
       return new_statement(*this, select_columns_t<Columns...>{columns});
-    } else {
-      return ::sqlpp::bad_expression_t{_check};
-    }
   }
 };
 
@@ -197,8 +168,8 @@ template <typename Context, typename Statement>
 }
 
 template <typename... Columns>
-[[nodiscard]] constexpr auto select_columns(Columns&&... columns) {
-  return statement<no_select_columns_t>{}.columns(
-      std::forward<Columns>(columns)...);
+requires(sizeof...(Columns) > 0)
+[[nodiscard]] constexpr auto select_columns(Columns... columns) {
+  return statement<no_select_columns_t>{}.columns(columns...);
 }
 }  // namespace sqlpp

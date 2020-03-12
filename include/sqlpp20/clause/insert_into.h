@@ -67,24 +67,6 @@ template <typename Context, typename Table, typename Statement>
   return std::string("INSERT INTO ") + to_sql_string(context, t._table);
 }
 
-SQLPP_WRAPPED_STATIC_ASSERT(assert_insert_into_arg_is_table,
-                            "insert_into() arg has to be a table");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_insert_into_arg_no_read_only_table,
-                            "insert_into() arg must not be read-only table");
-
-template <typename T>
-constexpr auto check_insert_into_arg(const T&) {
-  if constexpr (!is_table_v<T>) {
-    return failed<assert_insert_into_arg_is_table>{};
-  } else if constexpr (is_read_only_v<T>) {
-    return failed<assert_insert_into_arg_no_read_only_table>{};
-  }
-#warning: If something is a table, it must not have unsatisfied dependencies on other tables. It should be unnecessary to test that here.
-  else {
-    return succeeded{};
-  }
-}
-
 template <typename Table>
 constexpr auto is_result_clause_v<insert_into_t<Table>> = true;
 
@@ -93,14 +75,9 @@ struct clause_result_type<insert_into_t<Table>> {
   using type = insert_result;
 };
 
-template <typename Table>
+template <PrimaryTable Table>
 [[nodiscard]] constexpr auto insert_into(Table t) {
-  constexpr auto _check = check_insert_into_arg(t);
-  if constexpr (_check) {
     return statement<insert_into_t<Table>>{t}
            << statement<no_insert_values_t>{};
-  } else {
-    return ::sqlpp::bad_expression_t{_check};
-  }
 }
 }  // namespace sqlpp

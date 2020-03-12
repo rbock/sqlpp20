@@ -60,61 +60,23 @@ struct nodes_of<when_then_t<When, Then>> {
   using type = type_vector<When, Then>;
 };
 
-SQLPP_WRAPPED_STATIC_ASSERT(assert_when_first_arg_is_boolean_expression,
-                            "when() first arg must be a boolean expression");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_then_value_types_match,
-                            "all then() args must have the same value_type");
-
-template <typename ExpectedValueType, typename When, typename Then>
-constexpr auto check_when_then_args() {
-  if constexpr (not has_boolean_value_v<When>) {
-    return failed<assert_when_first_arg_is_boolean_expression>{};
-  } else if constexpr (not std::is_same_v<ExpectedValueType,
-                                          value_type_of_t<Then>>) {
-    return failed<assert_then_value_types_match>{};
-  } else
-    return succeeded{};
-}
-
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_else_value_type_matches,
-    "else() arg must have the same value_type as the then()");
-
-template <typename ExpectedValueType, typename Else>
-constexpr auto check_else_arg() {
-  if constexpr (not std::is_same_v<ExpectedValueType, value_type_of_t<Else>>) {
-    return failed<assert_else_value_type_matches>{};
-  } else
-    return succeeded{};
-}
-
 template <typename... WhenThens>
 struct case_when_then_t {
   std::tuple<WhenThens...> _when_thens;
 
   template <typename When, typename Then>
+  requires(has_boolean_value_v<When> and std::is_same_v<value_type_of_t<case_when_then_t>,
+                                          value_type_of_t<Then>>)
   [[nodiscard]] constexpr auto when(When when, then_t<Then> then) const {
-    if constexpr (constexpr auto _check =
-                      check_when_then_args<value_type_of_t<case_when_then_t>,
-                                           When, Then>();
-                  _check) {
-      auto _wt = when_then_t<When, Then>{when, then._expr};
-      return case_when_then_t<WhenThens..., decltype(_wt)>{
-          std::tuple_cat(_when_thens, std::tuple{_wt})};
-    } else {
-      return bad_expression_t{_check};
-    }
+    auto _wt = when_then_t<When, Then>{when, then._expr};
+    return case_when_then_t<WhenThens..., decltype(_wt)>{
+        std::tuple_cat(_when_thens, std::tuple{_wt})};
   }
 
   template <typename Else>
+  requires(std::is_same_v<value_type_of_t<case_when_then_t>, value_type_of_t<Else>>)
   [[nodiscard]] constexpr auto else_(Else els) const {
-    if constexpr (constexpr auto _check =
-                      check_else_arg<value_type_of_t<case_when_then_t>, Else>();
-                  _check) {
-      return case_when_then_else_t<case_when_then_t, Else>{*this, els};
-    } else {
-      return bad_expression_t{_check};
-    }
+    return case_when_then_else_t<case_when_then_t, Else>{*this, els};
   }
 };
 
@@ -154,42 +116,16 @@ template <typename Context, typename CaseWhenThen, typename Else>
          to_sql_string(context, embrace(t._else));
 }
 
-SQLPP_WRAPPED_STATIC_ASSERT(assert_then_arg_is_expression,
-                            "then() arg must be a value expression");
-
-template <typename Then>
-constexpr auto check_then_args() {
-  if constexpr (not is_expression_v<Then>) {
-    return failed<assert_then_arg_is_expression>{};
-  } else
-    return succeeded{};
-}
-
-template <typename Then>
+template <Expression Then>
 [[nodiscard]] constexpr auto then(Then expr) {
-  if constexpr (constexpr auto _check = check_then_args<Then>(); _check) {
     return then_t<Then>{expr};
-  } else {
-    return ::sqlpp::bad_expression_t{_check};
-  }
 }
 
-template <typename When>
-constexpr auto check_when_args() {
-  if constexpr (not has_boolean_value_v<When>) {
-    return failed<assert_when_first_arg_is_boolean_expression>{};
-  } else
-    return succeeded{};
-}
-
-template <typename When, typename Then>
+template <typename When, Expression Then>
+requires(has_boolean_value_v<When>)
 [[nodiscard]] constexpr auto case_when(When when, then_t<Then> then) {
-  if constexpr (constexpr auto _check = check_then_args<When>(); _check) {
     auto wt = when_then_t<When, Then>{when, then._expr};
     return case_when_then_t<decltype(wt)>{std::tuple{wt}};
-  } else {
-    return ::sqlpp::bad_expression_t{_check};
-  }
 }
 
 }  // namespace sqlpp

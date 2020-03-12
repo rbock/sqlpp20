@@ -35,65 +35,42 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tuple>
 
 namespace sqlpp {
-template <typename... Columns>
+template <typename... Expressions>
 struct group_by_t {
-  std::tuple<Columns...> _columns;
+  std::tuple<Expressions...> _expressions;
 };
 
-template <typename... Columns>
-struct nodes_of<group_by_t<Columns...>> {
-  using type = type_vector<Columns...>;
+template <typename... Expressions>
+struct nodes_of<group_by_t<Expressions...>> {
+  using type = type_vector<Expressions...>;
 };
 
-template <typename... Columns>
-struct provided_aggregates_of<group_by_t<Columns...>> {
-  static constexpr auto value = type_vector<Columns...>();
+template <typename... Expressions>
+struct provided_aggregates_of<group_by_t<Expressions...>> {
+  static constexpr auto value = type_vector<Expressions...>();
 };
 
 template <typename Table>
 constexpr auto clause_tag<group_by_t<Table>> = ::std::string_view{"group_by"};
 
-template <typename... Columns, typename Statement>
-class clause_base<group_by_t<Columns...>, Statement> {
+template <typename... Expressions, typename Statement>
+class clause_base<group_by_t<Expressions...>, Statement> {
  public:
   template <typename OtherStatement>
-  clause_base(const clause_base<group_by_t<Columns...>, OtherStatement>& s)
-      : _columns(s._columns) {}
+  clause_base(const clause_base<group_by_t<Expressions...>, OtherStatement>& s)
+      : _expressions(s._expressions) {}
 
-  clause_base(const group_by_t<Columns...>& f) : _columns(f._columns) {}
+  clause_base(const group_by_t<Expressions...>& f) : _expressions(f._expressions) {}
 
-  std::tuple<Columns...> _columns;
+  std::tuple<Expressions...> _expressions;
 };
 
-template <typename Context, typename... Columns, typename Statement>
+template <typename Context, typename... Expressions, typename Statement>
 [[nodiscard]] auto to_sql_string(
-    Context& context, const clause_base<group_by_t<Columns...>, Statement>& t) {
+    Context& context, const clause_base<group_by_t<Expressions...>, Statement>& t) {
   return std::string{" GROUP BY "} +
          tuple_to_sql_string(context, ", ",
-                             std::tie(std::get<Columns>(t._columns)...));
-}
-
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_group_by_args_not_empty,
-    "group_by() must be called with at least one argument");
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_group_by_args_are_expressions,
-    "group_by() args must be value expressions (e.g. columns)");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_group_by_args_contain_no_aggregate,
-                            "group_by() args must not contain aggregate "
-                            "expressions (e.g. max or count)");
-
-template <typename... T>
-constexpr auto check_group_by_arg(const T&...) {
-  if constexpr (sizeof...(T) == 0) {
-    return failed<assert_group_by_args_not_empty>{};
-  } else if constexpr (!(true && ... && is_expression_v<T>)) {
-    return failed<assert_group_by_args_are_expressions>{};
-  } else if constexpr (recursive_contains_aggregate(type_vector<>{},
-                                                    type_vector<T...>{})) {
-    return failed<assert_group_by_args_contain_no_aggregate>{};
-  } else
-    return succeeded{};
+                             std::tie(std::get<Expressions>(t._expressions)...));
 }
 
 struct no_group_by_t {};
@@ -106,25 +83,13 @@ class clause_base<no_group_by_t, Statement> {
 
   constexpr clause_base() = default;
 
-  template <typename... Columns>
-  [[nodiscard]] constexpr auto group_by(Columns... columns) const {
-    constexpr auto _check = check_group_by_arg(columns...);
-    if constexpr (_check) {
-      return new_statement(*this,
-                           group_by_t<Columns...>{std::tuple(columns...)});
-    } else {
-      return ::sqlpp::bad_expression_t{_check};
-    }
-  }
-
-  template <typename... Columns>
-  [[nodiscard]] constexpr auto group_by(std::tuple<Columns...> columns) const {
-    constexpr auto _check = check_group_by_arg(std::declval<Columns>()...);
-    if constexpr (_check) {
-      return new_statement(*this, group_by_t<Columns...>{columns});
-    } else {
-      return ::sqlpp::bad_expression_t{_check};
-    }
+  template <Expression... Expressions>
+  requires(sizeof...(Expressions) > 0 
+           and not recursive_contains_aggregate(type_vector<>{},
+                                                type_vector<Expressions...>{}))
+  [[nodiscard]] constexpr auto group_by(Expressions... expressions) const {
+    return new_statement(*this,
+                         group_by_t<Expressions...>{std::tuple(expressions...)});
   }
 };
 
@@ -134,8 +99,8 @@ template <typename Context, typename Statement>
   return std::string{};
 }
 
-template <typename... Columns>
-[[nodiscard]] constexpr auto group_by(Columns&&... columns) {
-  return statement<no_group_by_t>{}.group_by(std::forward<Columns>(columns)...);
+template <Expression... Expressions>
+[[nodiscard]] constexpr auto group_by(Expressions... expressions) {
+  return statement<no_group_by_t>{}.group_by(expressions...);
 }
 }  // namespace sqlpp

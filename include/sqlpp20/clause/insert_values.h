@@ -35,6 +35,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/tuple_to_sql_string.h>
 #include <sqlpp20/type_traits.h>
 #include <sqlpp20/type_vector_is_subset_of.h>
+#include <sqlpp20/unique_types.h>
 #include <sqlpp20/wrapped_static_assert.h>
 
 #include <tuple>
@@ -262,52 +263,11 @@ template <typename Context, typename Statement, typename... Assignments>
   return ret;
 }
 
-SQLPP_WRAPPED_STATIC_ASSERT(assert_insert_set_at_least_one_arg,
-                            "at least one assignment required in set()");
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_insert_set_args_are_assignments,
-    "at least one argument is not an assignment in set()");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_insert_set_args_contain_no_duplicates,
-                            "at least one duplicate column detected in set()");
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_insert_set_assignments_are_allowed,
-    "at least one assignment is prohibited by its column definition in set()");
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_insert_set_args_affect_single_table,
-    "set() arguments contain assignments from more than one table");
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_insert_set_optional_args_have_default,
-    "at least one optional assignment affects a column without a default");
+template<typename... As>
+constexpr auto unique_assignment_columns_v = unique_types_v<column_of_t<remove_optional_t<As>>...>;
 
-template <typename... Assignments>
-constexpr auto check_insert_set_args() {
-  if constexpr (sizeof...(Assignments) == 0) {
-    return failed<assert_insert_set_at_least_one_arg>{};
-  } else if constexpr (!(true && ... &&
-                         is_assignment_v<remove_optional_t<Assignments>>)) {
-    return failed<assert_insert_set_args_are_assignments>{};
-  } else if constexpr (type_set<char_sequence_of_t<
-                           column_of_t<remove_optional_t<Assignments>>>...>()
-                           .size() != sizeof...(Assignments)) {
-    return failed<assert_insert_set_args_contain_no_duplicates>{};
-  } else if constexpr ((false || ... ||
-                        is_read_only_v<
-                            column_of_t<remove_optional_t<Assignments>>>)) {
-    return failed<assert_insert_set_assignments_are_allowed>{};
-  } else if constexpr (type_set<table_spec_of_t<
-                           column_of_t<remove_optional_t<Assignments>>>...>()
-                           .size() != 1) {
-    return failed<assert_insert_set_args_affect_single_table>{};
-  } else if constexpr (not(true and ... and
-                           (is_optional_v<Assignments>
-                                ? has_default_v<column_of_t<
-                                      remove_optional_t<Assignments>>>
-                                : true))) {
-    return failed<assert_insert_set_optional_args_have_default>{};
-  } else
-    return succeeded{};
-}
-
+#warning: Assignments need to prevent read-only
+#warning: check table of assignments before executing query
 struct no_insert_values_t {};
 
 template <typename Statement>
@@ -319,32 +279,23 @@ class clause_base<no_insert_values_t, Statement> {
 
   constexpr clause_base() = default;
 
+#warning need to check if all columns have default value
   [[nodiscard]] constexpr auto default_values() const {
     return new_statement(*this, insert_default_values_t{});
   }
 
-  template <typename... Assignments>
-  [[nodiscard]] constexpr auto set(Assignments... assignments) const {
-    constexpr auto _check = check_insert_set_args<Assignments...>();
-    if constexpr (_check) {
-      using row_t = std::tuple<Assignments...>;
-      return new_statement(
-          *this, insert_values_t<Assignments...>{row_t{assignments...}});
-    } else {
-      return ::sqlpp::bad_expression_t{_check};
-    }
+  template <OptionalInsertAssignment A, OptionalInsertAssignment... As>
+  requires(unique_assignment_columns_v<A, As...>)
+  [[nodiscard]] constexpr auto set(A a, As... as) const {
+    using row_t = std::tuple<A, As...>;
+    return new_statement(*this, insert_values_t<A, As...>{row_t{a, as...}});
   }
 
-  template <typename... Assignments>
+  template <OptionalInsertAssignment A, OptionalInsertAssignment... As>
+  requires(unique_assignment_columns_v<A, As...>)
   [[nodiscard]] constexpr auto multiset(
-      std::vector<std::tuple<Assignments...>> assignments) const {
-    constexpr auto _check = check_insert_set_args<Assignments...>();
-    if constexpr (_check) {
-      return new_statement(*this,
-                           insert_multi_values_t<Assignments...>{assignments});
-    } else {
-      return ::sqlpp::bad_expression_t{_check};
-    }
+      std::vector<std::tuple<A, As...>> assignments) const {
+    return new_statement(*this, insert_multi_values_t<A, As...>{assignments});
   }
 };
 

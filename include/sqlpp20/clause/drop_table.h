@@ -34,67 +34,49 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/wrong.h>
 
 namespace sqlpp {
-template <typename Table>
+template <typename Tab>
 struct drop_table_t {
-  Table _table;
+  Tab _table;
 };
 
-template <typename Table>
-struct nodes_of<drop_table_t<Table>> {
-  using type = type_vector<Table>;
+template <typename Tab>
+struct nodes_of<drop_table_t<Tab>> {
+  using type = type_vector<Tab>;
 };
 
-template <typename Table>
-constexpr auto clause_tag<drop_table_t<Table>> =
+template <typename Tab>
+constexpr auto clause_tag<drop_table_t<Tab>> =
     ::std::string_view{"drop_table"};
 
-template <typename Table, typename Statement>
-class clause_base<drop_table_t<Table>, Statement> {
+template <typename Tab, typename Statement>
+class clause_base<drop_table_t<Tab>, Statement> {
  public:
   template <typename OtherStatement>
-  clause_base(const clause_base<drop_table_t<Table>, OtherStatement>& t)
+  clause_base(const clause_base<drop_table_t<Tab>, OtherStatement>& t)
       : _table(t.table) {}
 
-  clause_base(Table table) : _table(table) {}
+  clause_base(Tab table) : _table(table) {}
 
-  Table _table;
+  Tab _table;
 };
 
-template <typename Table>
-constexpr auto is_result_clause_v<drop_table_t<Table>> = true;
+template <typename Tab>
+constexpr auto is_result_clause_v<drop_table_t<Tab>> = true;
 
-template <typename Table>
-struct clause_result_type<drop_table_t<Table>> {
+template <typename Tab>
+struct clause_result_type<drop_table_t<Tab>> {
   using type = execute_result;
 };
 
-template <typename Context, typename Table, typename Statement>
+template <typename Context, typename Tab, typename Statement>
 [[nodiscard]] auto to_sql_string(
-    Context& context, const clause_base<drop_table_t<Table>, Statement>& t) {
+    Context& context, const clause_base<drop_table_t<Tab>, Statement>& t) {
   return std::string("DROP TABLE IF EXISTS ") + to_sql_name(context, t._table);
 }
 
-SQLPP_WRAPPED_STATIC_ASSERT(assert_drop_table_arg_is_table,
-                            "drop_table() arg has to be a table");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_drop_table_arg_no_read_only_table,
-                            "drop_table() arg must not be read-only table");
-
-template <typename T>
-constexpr auto check_drop_table_arg() {
-  if constexpr (!is_table_v<T>) {
-    return failed<assert_drop_table_arg_is_table>{};
-  } else if constexpr (is_read_only_v<T>) {
-    return failed<assert_drop_table_arg_no_read_only_table>{};
-  } else
-    return succeeded{};
-}
-
-template <typename Table>
-[[nodiscard]] constexpr auto drop_table(Table table) {
-  if constexpr (constexpr auto _check = check_drop_table_arg<Table>(); _check) {
-    return statement<drop_table_t<Table>>{table};
-  } else {
-    return ::sqlpp::bad_expression_t{_check};
-  }
+template <Table Tab>
+requires(not is_read_only_v<Tab>)
+[[nodiscard]] constexpr auto drop_table(Tab table) {
+  return statement<drop_table_t<Tab>>{table};
 }
 }  // namespace sqlpp

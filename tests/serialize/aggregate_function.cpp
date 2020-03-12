@@ -43,8 +43,8 @@ int main() {
                     to_sql_string_c(mock_context_t{}, min(tabPerson.id)));
     assert_equality("MAX(tab_person.id)",
                     to_sql_string_c(mock_context_t{}, max(tabPerson.id)));
-    assert_equality("COUNT(1)",
-                    to_sql_string_c(mock_context_t{}, ::sqlpp::count(1)));
+    assert_equality("COUNT(*)",
+                    to_sql_string_c(mock_context_t{}, ::sqlpp::count(::sqlpp::asterisk)));
     assert_equality("COUNT(tab_person.id)",
                     to_sql_string_c(mock_context_t{}, count(tabPerson.id)));
     assert_equality("COUNT(DISTINCT tab_person.id)",

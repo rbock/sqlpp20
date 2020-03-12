@@ -79,17 +79,6 @@ template <typename Context, typename Number, typename Statement>
   return std::string{" OFFSET "} + to_sql_string(context, get_value(t._number));
 }
 
-SQLPP_WRAPPED_STATIC_ASSERT(assert_offset_arg_is_integral_value,
-                            "offset() arg has to be an integral value");
-
-template <typename T>
-constexpr auto check_offset_arg() {
-  if constexpr (!std::is_integral_v<T>) {
-    return failed<assert_offset_arg_is_integral_value>{};
-  } else
-    return succeeded{};
-}
-
 struct no_offset_t {};
 
 template <typename Statement>
@@ -101,13 +90,9 @@ class clause_base<no_offset_t, Statement> {
   constexpr clause_base() = default;
 
   template <typename Value>
+  requires(std::is_integral_v<Value>)
   [[nodiscard]] constexpr auto offset(Value value) const {
-    constexpr auto _check = check_offset_arg<remove_optional_t<Value>>();
-    if constexpr (_check) {
-      return new_statement(*this, offset_t<Value>{value});
-    } else {
-      return ::sqlpp::bad_expression_t{_check};
-    }
+    return new_statement(*this, offset_t<Value>{value});
   }
 };
 
@@ -118,6 +103,7 @@ template <typename Context, typename Statement>
 }
 
 template <typename Value>
+requires(std::is_integral_v<Value>)
 [[nodiscard]] constexpr auto offset(Value&& value) {
   return statement<no_offset_t>{}.offset(std::forward<Value>(value));
 }

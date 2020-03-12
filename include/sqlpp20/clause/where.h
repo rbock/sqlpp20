@@ -84,27 +84,6 @@ template <typename Context, typename Statement>
   return std::string{};
 }
 
-SQLPP_WRAPPED_STATIC_ASSERT(assert_where_arg_is_expression,
-                            "where() arg has to be a boolean expression");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_where_arg_is_boolean,
-                            "where() arg has to be a boolean expression");
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_where_arg_contains_no_aggregate,
-    "where() arg must not contain aggregate expressions (e.g. max or count)");
-
-template <typename Condition>
-constexpr auto check_where_arg(const Condition&) {
-  if constexpr (!is_expression_v<Condition>) {
-    return failed<assert_where_arg_is_expression>{};
-  } else if constexpr (!has_boolean_value_v<Condition>) {
-    return failed<assert_where_arg_is_boolean>{};
-  } else if constexpr (recursive_contains_aggregate(type_vector<>{},
-                                                    type_t<Condition>{})) {
-    return failed<assert_where_arg_contains_no_aggregate>{};
-  } else
-    return succeeded{};
-}
-
 struct no_where_t {};
 
 template <typename Statement>
@@ -119,14 +98,11 @@ class clause_base<no_where_t, Statement> {
     return new_statement(*this, unconditionally_t{});
   }
 
-  template <typename Condition>
+  template <BooleanExpression Condition>
+  requires(not recursive_contains_aggregate(type_vector<>{},
+                                            type_t<Condition>{}))
   [[nodiscard]] constexpr auto where(Condition condition) const {
-    constexpr auto _check = check_where_arg(condition);
-    if constexpr (_check) {
-      return new_statement(*this, where_t<Condition>{condition});
-    } else {
-      return ::sqlpp::bad_expression_t{_check};
-    }
+    return new_statement(*this, where_t<Condition>{condition});
   }
 };
 

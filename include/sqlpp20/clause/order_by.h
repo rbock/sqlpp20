@@ -90,23 +90,6 @@ template <typename Context, typename... Columns, typename Statement>
          tuple_to_sql_string(context, ", ", t._columns);
 }
 
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_order_by_args_not_empty,
-    "order_by() must be called with at least one argument");
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_order_by_args_are_sort_expressions,
-    "order_by() args must be sort expressions (tab.foo.asc())");
-
-template <typename... T>
-constexpr auto check_order_by_arg(const T&...) {
-  if constexpr (sizeof...(T) == 0) {
-    return failed<assert_order_by_args_not_empty>{};
-  } else if constexpr (!(true && ... && is_sort_order_v<T>)) {
-    return failed<assert_order_by_args_are_sort_expressions>{};
-  } else
-    return succeeded{};
-}
-
 struct no_order_by_t {};
 
 template <typename Statement>
@@ -117,26 +100,10 @@ class clause_base<no_order_by_t, Statement> {
 
   constexpr clause_base() = default;
 
-  template <typename... Expressions>
+  template <OrderExpression... Expressions>
+  requires(sizeof...(Expressions) > 0)
   [[nodiscard]] constexpr auto order_by(Expressions... expressions) const {
-    if constexpr (constexpr auto _check = check_order_by_arg(expressions...);
-                  _check) {
-      return new_statement(*this, order_by_t{std::tuple{expressions...}});
-    } else {
-      return ::sqlpp::bad_expression_t{_check};
-    }
-  }
-
-  template <typename... Expressions>
-  [[nodiscard]] constexpr auto order_by(
-      std::tuple<Expressions...> expressions) const {
-    if constexpr (constexpr auto _check =
-                      check_order_by_arg(std::declval<Expressions>()...);
-                  _check) {
-      return new_statement(*this, order_by_t{expressions});
-    } else {
-      return ::sqlpp::bad_expression_t(_check);
-    }
+    return new_statement(*this, order_by_t{std::tuple{expressions...}});
   }
 };
 
@@ -146,7 +113,8 @@ template <typename Context, typename Statement>
   return std::string{};
 }
 
-template <typename... Expressions>
+template <OrderExpression... Expressions>
+requires(sizeof...(Expressions) > 0)
 [[nodiscard]] constexpr auto order_by(Expressions&&... expressions) {
   return statement<no_order_by_t>{}.order_by(
       std::forward<Expressions>(expressions)...);

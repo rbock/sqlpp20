@@ -66,7 +66,7 @@ auto select_tests(Db& db) -> void {
               << row.division << std::endl;
   }
 
-  for (const auto& row : db(select(::sqlpp::count(1).as(rowCount),
+  for (const auto& row : db(select(::sqlpp::count(::sqlpp::asterisk).as(rowCount),
                                    max(::test::tabPerson.name).as(maxName),
                                    avg(::test::tabPerson.id).as(avgId),
                                    ::test::tabPerson.isManager)
@@ -74,7 +74,7 @@ auto select_tests(Db& db) -> void {
                                 .where(::test::tabPerson.isManager and
                                        ::test::tabPerson.name != "")
                                 .group_by(::test::tabPerson.isManager)
-                                .having(::sqlpp::count(1) > 7)
+                                .having(::sqlpp::count(::sqlpp::asterisk) > 7)
                                 .order_by(asc(max(::test::tabPerson.id)))
                                 .limit(1)
                                 .offset(1))) {

@@ -82,21 +82,6 @@ template <typename Context, typename Condition, typename Statement>
   return std::string(" HAVING ") + to_sql_string(context, t._condition);
 }
 
-SQLPP_WRAPPED_STATIC_ASSERT(assert_having_arg_is_expression,
-                            "having() arg has to be a boolean expression");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_having_arg_is_boolean,
-                            "having() arg has to be a boolean expression");
-
-template <typename T>
-constexpr auto check_having_arg(const T&) {
-  if constexpr (!is_expression_v<T>) {
-    return failed<assert_having_arg_is_expression>{};
-  } else if constexpr (!has_boolean_value_v<T>) {
-    return failed<assert_having_arg_is_boolean>{};
-  } else
-    return succeeded{};
-}
-
 struct no_having_t {};
 
 template <typename Statement>
@@ -107,14 +92,9 @@ class clause_base<no_having_t, Statement> {
 
   constexpr clause_base() = default;
 
-  template <typename Condition>
+  template <BooleanExpression Condition>
   [[nodiscard]] constexpr auto having(Condition condition) const {
-    constexpr auto _check = check_having_arg(condition);
-    if constexpr (_check) {
-      return new_statement(*this, having_t<Condition>{condition});
-    } else {
-      return ::sqlpp::bad_expression_t{_check};
-    }
+    return new_statement(*this, having_t<Condition>{condition});
   }
 };
 
@@ -124,7 +104,7 @@ template <typename Context, typename Statement>
   return std::string{};
 }
 
-template <typename Condition>
+template <BooleanExpression Condition>
 [[nodiscard]] constexpr auto having(Condition&& condition) {
   return statement<no_having_t>{}.having(std::forward<Condition>(condition));
 }

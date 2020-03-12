@@ -79,17 +79,6 @@ template <typename Context, typename Number, typename Statement>
   return std::string(" LIMIT ") + to_sql_string(context, get_value(t._number));
 }
 
-SQLPP_WRAPPED_STATIC_ASSERT(assert_limit_arg_is_integral_value,
-                            "limit() arg has to be an integral value");
-
-template <typename T>
-constexpr auto check_limit_arg() {
-  if constexpr (!std::is_integral_v<T>) {
-    return failed<assert_limit_arg_is_integral_value>{};
-  } else
-    return succeeded{};
-}
-
 struct no_limit_t {};
 
 template <typename Statement>
@@ -101,13 +90,9 @@ class clause_base<no_limit_t, Statement> {
   constexpr clause_base() = default;
 
   template <typename Value>
+  requires(std::is_integral_v<Value>)
   [[nodiscard]] constexpr auto limit(Value value) const {
-    constexpr auto _check = check_limit_arg<remove_optional_t<Value>>();
-    if constexpr (_check) {
-      return new_statement(*this, limit_t<Value>{value});
-    } else {
-      return ::sqlpp::bad_expression_t{_check};
-    }
+    return new_statement(*this, limit_t<Value>{value});
   }
 };
 
@@ -118,6 +103,7 @@ template <typename Context, typename Statement>
 }
 
 template <typename Value>
+requires(std::is_integral_v<Value>)
 [[nodiscard]] constexpr auto limit(Value&& value) {
   return statement<no_limit_t>{}.limit(std::forward<Value>(value));
 }
