@@ -101,25 +101,6 @@ template <typename Context, with_mode Mode, typename... CommonTableExpressions,
          " ";
 }
 
-SQLPP_WRAPPED_STATIC_ASSERT(assert_with_args_are_ctes,
-                            "with() args must be CTEs");
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_with_args_not_recursive,
-    "with() args must not be recursive, use with_recursive()");
-
-template <with_mode Mode, typename... CommonTableExpressions>
-constexpr auto check_with_args(const CommonTableExpressions&...) {
-  if constexpr (not(true and ... and is_cte_v<CommonTableExpressions>)) {
-    return failed<assert_with_args_are_ctes>{};
-  } else if constexpr (Mode == with_mode::flat and
-                       (false or ... or
-                        is_cte_recursive_v<CommonTableExpressions>)) {
-    return failed<assert_with_args_not_recursive>{};
-  } else {
-    return succeeded{};
-  }
-}
-
 struct no_with_t {};
 
 template <typename Statement>
@@ -130,30 +111,18 @@ class clause_base<no_with_t, Statement> {
 
   constexpr clause_base() = default;
 
-  template <typename... CommonTableExpressions>
+  template <FlatCommonTableExpression... CommonTableExpressions>
   [[nodiscard]] constexpr auto with(CommonTableExpressions... ctes) const {
-    if constexpr (constexpr auto _check =
-                      check_with_args<with_mode::flat>(ctes...);
-                  _check) {
       return new_statement(
           *this, with_t<with_mode::flat, CommonTableExpressions...>{ctes...});
-    } else {
-      return ::sqlpp::bad_expression_t{_check};
-    }
   }
 
-  template <typename... CommonTableExpressions>
+  template <CommonTableExpression... CommonTableExpressions>
   [[nodiscard]] constexpr auto with_recursive(
       CommonTableExpressions... ctes) const {
-    if constexpr (constexpr auto _check =
-                      check_with_args<with_mode::recursive>(ctes...);
-                  _check) {
       return new_statement(
           *this,
           with_t<with_mode::recursive, CommonTableExpressions...>{ctes...});
-    } else {
-      return ::sqlpp::bad_expression_t{_check};
-    }
   }
 };
 

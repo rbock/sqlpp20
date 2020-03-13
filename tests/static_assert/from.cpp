@@ -36,17 +36,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using ::sqlpp::test::assert_bad_expression;
 using ::sqlpp::test::assert_good_expression;
 
-// Turning off static_assert for from()
-namespace sqlpp {
-template <typename... T>
-constexpr auto wrong<assert_from_arg_is_table, T...> = true;
-
-template <typename... T>
-constexpr auto wrong<assert_from_arg_is_not_conditionless_join, T...> = true;
-}  // namespace sqlpp
-
 int main() {
   constexpr auto s = sqlpp::statement<sqlpp::no_from_t>{};
+
+#warning Reactivate with constraint tests
+
+  /*
 
   // constexpr tests
   assert_bad_expression(sqlpp::assert_from_arg_is_table{}, s.from(1));
@@ -59,4 +54,5 @@ int main() {
   // non-constexpr tests
   assert_bad_expression(sqlpp::assert_from_arg_is_table{},
                         sqlpp::from(std::string("mytable")));
+                        */
 }

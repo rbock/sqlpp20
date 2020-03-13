@@ -30,6 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/type_hash.h>
 #include <sqlpp20/type_set.h>
 #include <sqlpp20/type_vector.h>
+#include <sqlpp20/unique_types.h>
 #include <sqlpp20/wrong.h>
 
 #include <cstdint>
@@ -208,6 +209,10 @@ struct result_rows_are_compatible {
 template <typename Left, typename Right>
 constexpr auto result_rows_are_compatible_v =
     result_rows_are_compatible<Left, Right>::value;
+
+template <typename Left, typename Right>
+constexpr auto are_union_compatible_v =
+    result_rows_are_compatible_v<result_row_of_t<Left>, result_row_of_t<Right>>;
 
 template <typename T>
 constexpr auto is_bad_expression_v = false;
@@ -694,12 +699,24 @@ inline constexpr auto is_cte_recursive_v = is_cte_recursive<T>::value;
 template <typename T>
 constexpr auto has_name_v = not std::is_same_v<name_tag_of_t<T>, none_t>;
 
+template<typename... As>
+constexpr auto unique_assignment_columns_v = unique_types_v<column_of_t<remove_optional_t<As>>...>;
+
 // Concepts
+template <typename T>
+concept Statement = is_statement_v<T>;
+
+template <typename T>
+concept SelectStatement = is_statement_v<T> and has_result_row_v<T>;
+
 template <typename T>
 concept Expression = is_expression_v<T>;
 
 template <typename T>
 concept BooleanExpression = is_expression_v<T> and has_boolean_value_v<T>;
+
+template <typename T>
+concept SelectFlag = is_select_flag_v<remove_optional_t<T>>;
 
 template <typename T>
 concept Selectable = is_selectable_v<remove_optional_t<T>>;
@@ -723,6 +740,15 @@ concept OptionalInsertAssignment =
                       : true);
 
 template <typename T>
+concept OptionalAssignment = is_assignment_v<remove_optional_t<T>>;
+
+template <typename T>
 concept OrderExpression = is_sort_order_v<T>;
+
+template <typename T>
+concept FlatCommonTableExpression = is_cte_v<T> and not is_cte_recursive_v<T>;
+
+template <typename T>
+concept CommonTableExpression = is_cte_v<T>;
 
 }  // namespace sqlpp

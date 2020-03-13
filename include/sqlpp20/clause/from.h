@@ -34,52 +34,35 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 
 namespace sqlpp {
-template <typename Table>
+template <typename Tab>
 struct from_t {
-  Table _table;
+  Tab _table;
 };
 
-template <typename Table>
-struct nodes_of<from_t<Table>> {
-  using type = type_vector<Table>;
+template <typename Tab>
+struct nodes_of<from_t<Tab>> {
+  using type = type_vector<Tab>;
 };
 
-template <typename Table>
-constexpr auto clause_tag<from_t<Table>> = ::std::string_view{"from"};
+template <typename Tab>
+constexpr auto clause_tag<from_t<Tab>> = ::std::string_view{"from"};
 
-template <typename Table, typename Statement>
-class clause_base<from_t<Table>, Statement> {
+template <typename Tab, typename Statement>
+class clause_base<from_t<Tab>, Statement> {
  public:
   template <typename OtherStatement>
-  clause_base(const clause_base<from_t<Table>, OtherStatement>& s)
+  clause_base(const clause_base<from_t<Tab>, OtherStatement>& s)
       : _table(s._table) {}
 
-  clause_base(const from_t<Table>& f) : _table(f._table) {}
+  clause_base(const from_t<Tab>& f) : _table(f._table) {}
 
-  Table _table;
+  Tab _table;
 };
 
-template <typename Context, typename Table, typename Statement>
+template <typename Context, typename Tab, typename Statement>
 [[nodiscard]] auto to_sql_string(
-    Context& context, const clause_base<from_t<Table>, Statement>& t) {
+    Context& context, const clause_base<from_t<Tab>, Statement>& t) {
   return std::string(" FROM ") + to_sql_string(context, t._table);
-}
-
-SQLPP_WRAPPED_STATIC_ASSERT(assert_from_arg_is_not_conditionless_join,
-                            "from() arg must not be a conditionless join, use "
-                            ".on() or .unconditionally()");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_from_arg_is_table,
-                            "from() arg has to be a table or join");
-
-template <typename T>
-constexpr auto check_from_arg(const T&) {
-  if constexpr (is_conditionless_join_v<T>) {
-    return failed<assert_from_arg_is_not_conditionless_join>{};
-  } else if constexpr (!is_table_v<T>) {
-    return failed<assert_from_arg_is_table>{};
-  } else {
-    return succeeded{};
-  }
 }
 
 struct no_from_t {};
@@ -92,14 +75,9 @@ class clause_base<no_from_t, Statement> {
 
   constexpr clause_base() = default;
 
-  template <typename Table>
-  [[nodiscard]] constexpr auto from(Table t) const {
-    constexpr auto _check = check_from_arg(t);
-    if constexpr (_check) {
-      return new_statement(*this, from_t<Table>{t});
-    } else {
-      return ::sqlpp::bad_expression_t{_check};
-    }
+  template <Table Tab>
+  [[nodiscard]] constexpr auto from(Tab t) const {
+      return new_statement(*this, from_t<Tab>{t});
   }
 };
 
@@ -109,8 +87,8 @@ template <typename Context, typename Statement>
   return std::string{};
 }
 
-template <typename Table>
-[[nodiscard]] constexpr auto from(Table&& t) {
-  return statement<no_from_t>{}.from(std::forward<Table>(t));
+template <typename Tab>
+[[nodiscard]] constexpr auto from(Tab t) {
+  return statement<no_from_t>{}.from(t);
 }
 }  // namespace sqlpp

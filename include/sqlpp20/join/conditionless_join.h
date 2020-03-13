@@ -31,24 +31,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/unconditional.h>
 
 namespace sqlpp {
-SQLPP_WRAPPED_STATIC_ASSERT(assert_on_is_boolean_expression,
-                            "argument is not a boolean expression in on()");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_join_on_no_foreign_table_dependencies,
-                            "on() condition must not depend on other tables");
-
-namespace detail {
-template <typename ConditionlessJoin, typename Expr>
-constexpr auto check_join() {
-  if constexpr (!is_expression_v<Expr> || !has_boolean_value_v<Expr>) {
-    return failed<assert_on_is_boolean_expression>{};
-  } else if constexpr (is_a_required_table_missing(
-                           provided_tables_of_v<ConditionlessJoin>,
-                           type_t<Expr>{})) {
-    return failed<assert_join_on_no_foreign_table_dependencies>{};
-  } else
-    return succeeded{};
-}
-}  // namespace detail
 
 template <Table Lhs, typename JoinType, OptionalTable Rhs>
 class conditionless_join_t {
@@ -56,14 +38,12 @@ class conditionless_join_t {
   constexpr conditionless_join_t(Lhs lhs, JoinType, Rhs rhs)
       : _lhs(lhs), _rhs(rhs) {}
 
-  template <typename Expr>
+  template <BooleanExpression Expr>
+  requires(not is_a_required_table_missing(
+                           provided_tables_of_v<conditionless_join_t>,
+                           type_t<Expr>{}))
   [[nodiscard]] constexpr auto on(const Expr& expr) const {
-    constexpr auto _check = detail::check_join<conditionless_join_t, Expr>();
-    if constexpr (_check) {
-      return join_t{_lhs, JoinType{}, _rhs, on_t<Expr>{expr}};
-    } else {
-      return ::sqlpp::bad_expression_t{_check};
-    }
+    return join_t{_lhs, JoinType{}, _rhs, on_t<Expr>{expr}};
   }
 
   [[nodiscard]] constexpr auto unconditionally() const {

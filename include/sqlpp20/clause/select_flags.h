@@ -69,21 +69,6 @@ template <typename Context, typename... Flags, typename Statement>
           to_sql_string(context, std::get<Flags>(t._flags)));
 }
 
-SQLPP_WRAPPED_STATIC_ASSERT(assert_select_flags_args_are_valid,
-                            "select flags() args must be valid select_flags");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_select_flags_args_are_unique,
-                            "select flags() args must have unique");
-
-template <typename... T>
-constexpr auto check_select_flags_arg(const T&...) {
-  if constexpr (!(true && ... && is_select_flag_v<T>)) {
-    return failed<assert_select_flags_args_are_valid>{};
-  } else if constexpr (type_set<T...>().size() != sizeof...(T)) {
-    return failed<assert_select_flags_args_are_unique>{};
-  } else
-    return succeeded{};
-}
-
 struct no_select_flags_t {};
 
 template <typename Statement>
@@ -95,25 +80,10 @@ class clause_base<no_select_flags_t, Statement> {
 
   constexpr clause_base() = default;
 
-  template <typename... Fields>
-  [[nodiscard]] constexpr auto flags(Fields... flags) const {
-    constexpr auto _check = check_select_flags_arg(flags...);
-    if constexpr (_check) {
+  template <SelectFlag... Flags>
+  [[nodiscard]] constexpr auto flags(Flags... flags) const {
       return new_statement(*this,
-                           select_flags_t<Fields...>{std::tuple(flags...)});
-    } else {
-      return ::sqlpp::bad_expression_t{_check};
-    }
-  }
-
-  template <typename... Fields>
-  [[nodiscard]] constexpr auto flags(std::tuple<Fields...> flags) const {
-    constexpr auto _check = check_select_flags_arg(std::declval<Fields>()...);
-    if constexpr (_check) {
-      return new_statement(*this, select_flags_t<Fields...>{flags});
-    } else {
-      return ::sqlpp::bad_expression_t{_check};
-    }
+                           select_flags_t<Flags...>{std::tuple(flags...)});
   }
 };
 
@@ -123,8 +93,8 @@ template <typename Context, typename Statement>
   return std::string{};
 }
 
-template <typename... Fields>
-[[nodiscard]] constexpr auto select_flags(Fields&&... flags) {
-  return statement<no_select_flags_t>{}.flags(std::forward<Fields>(flags)...);
+template <SelectFlag... Flags>
+[[nodiscard]] constexpr auto select_flags(Flags... flags) {
+  return statement<no_select_flags_t>{}.flags(flags...);
 }
 }  // namespace sqlpp

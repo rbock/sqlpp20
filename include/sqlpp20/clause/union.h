@@ -60,8 +60,8 @@ constexpr auto clause_tag<union_t<Flag, LeftSelect, RightSelect>> =
     ::std::string_view{"union"};
 
 template <typename Flag, typename LeftSelect, typename RightSelect,
-          typename Statement>
-class clause_base<union_t<Flag, LeftSelect, RightSelect>, Statement> {
+          typename BaseStatement>
+class clause_base<union_t<Flag, LeftSelect, RightSelect>, BaseStatement> {
  public:
   template <typename OtherStatement>
   clause_base(const clause_base<union_t<Flag, LeftSelect, RightSelect>,
@@ -77,95 +77,62 @@ class clause_base<union_t<Flag, LeftSelect, RightSelect>, Statement> {
 };
 
 template <typename Flag, typename LeftSelect, typename RightSelect,
-          typename Statement>
+          typename BaseStatement>
 struct result_row_of<
-    clause_base<union_t<Flag, LeftSelect, RightSelect>, Statement>> {
+    clause_base<union_t<Flag, LeftSelect, RightSelect>, BaseStatement>> {
   using type = result_row_of_t<LeftSelect>;
 };
 
 template <typename Context, typename Flag, typename LeftSelect,
-          typename RightSelect, typename Statement>
+          typename RightSelect, typename BaseStatement>
 [[nodiscard]] auto to_sql_string(
     Context& context,
-    const clause_base<union_t<Flag, LeftSelect, RightSelect>, Statement>& t) {
+    const clause_base<union_t<Flag, LeftSelect, RightSelect>, BaseStatement>& t) {
+#warning missing flag serialization?
   return to_sql_string(context, t._left) + " UNION " +
          to_sql_string(context, t._right);
 }
 
-SQLPP_WRAPPED_STATIC_ASSERT(assert_union_args_are_statements,
-                            "union_() args must be sql statements");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_union_args_have_result_rows,
-                            "union_() args have result rows (like select)");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_union_args_have_compatible_rows,
-                            "union_() args must have compatible result rows");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_union_rhs_arg_without_with,
-                            "union_() rhs arg must not contain a WITH clause");
-
-template <typename LeftSelect, typename RightSelect>
-constexpr auto check_union_args(const LeftSelect& l, const RightSelect& r) {
-  if constexpr (not(is_statement_v<LeftSelect> &&
-                    is_statement_v<RightSelect>)) {
-    return failed<assert_union_args_are_statements>{};
-  } else if constexpr (not(has_result_row_v<LeftSelect> &&
-                           has_result_row_v<RightSelect>)) {
-    return failed<assert_union_args_have_result_rows>{};
-  } else if constexpr (not result_rows_are_compatible_v<
-                           result_row_of_t<LeftSelect>,
-                           result_row_of_t<RightSelect>>) {
-    return failed<assert_union_args_have_compatible_rows>{};
-  } else if constexpr (not provided_ctes_of_v<RightSelect>.empty()) {
-    return failed<assert_union_rhs_arg_without_with>{};
-  } else {
-    return succeeded{};
-  }
-}
-
 struct no_union_t {};
 
-template <typename Statement>
-class clause_base<no_union_t, Statement> {
+template <typename BaseStatement>
+class clause_base<no_union_t, BaseStatement> {
  public:
   template <typename OtherStatement>
   constexpr clause_base(const clause_base<no_union_t, OtherStatement>& s) {}
 
   constexpr clause_base() = default;
 
-  template <typename RightSelect>
+  template <SelectStatement RightSelect>
+  requires(are_union_compatible_v<BaseStatement, RightSelect> and provided_ctes_of_v<RightSelect>.empty())
   [[nodiscard]] constexpr auto union_all(RightSelect rhs) const {
     return union_all(statement_of(*this), rhs);
   }
 
-  template <typename RightSelect>
+  template <SelectStatement RightSelect>
+  requires(are_union_compatible_v<BaseStatement, RightSelect> and provided_ctes_of_v<RightSelect>.empty())
   [[nodiscard]] constexpr auto union_distinct(RightSelect rhs) const {
-    return union_all(statement_of(*this), rhs);
+    return union_distinct(statement_of(*this), rhs);
   }
 };
 
-template <typename Context, typename Statement>
+template <typename Context, typename BaseStatement>
 [[nodiscard]] auto to_sql_string(Context& context,
-                                 const clause_base<no_union_t, Statement>&) {
+                                 const clause_base<no_union_t, BaseStatement>&) {
   return std::string{};
 }
 
-template <typename LeftSelect, typename RightSelect>
+template <SelectStatement LeftSelect, SelectStatement RightSelect>
+requires(are_union_compatible_v<LeftSelect, RightSelect> and provided_ctes_of_v<RightSelect>.empty())
 [[nodiscard]] constexpr auto union_all(LeftSelect l, RightSelect r) {
-  constexpr auto _check = check_union_args(l, r);
-  if constexpr (_check) {
-    using u = union_t<all_t, LeftSelect, RightSelect>;
-    return statement<u>{detail::statement_constructor_arg(u{all, l, r})};
-  } else {
-    return ::sqlpp::bad_expression_t{_check};
-  }
+  using u = union_t<all_t, LeftSelect, RightSelect>;
+  return statement<u>{detail::statement_constructor_arg(u{all, l, r})};
 }
 
-template <typename LeftSelect, typename RightSelect>
+template <SelectStatement LeftSelect, SelectStatement RightSelect>
+requires(are_union_compatible_v<LeftSelect, RightSelect> and provided_ctes_of_v<RightSelect>.empty())
 [[nodiscard]] constexpr auto union_distinct(LeftSelect l, RightSelect r) {
-  constexpr auto _check = check_union_args(l, r);
-  if constexpr (_check) {
-    using u = union_t<distinct_t, LeftSelect, RightSelect>;
-    return statement<u>{detail::statement_constructor_arg(u{distinct, l, r})};
-  } else {
-    return ::sqlpp::bad_expression_t{_check};
-  }
+  using u = union_t<distinct_t, LeftSelect, RightSelect>;
+  return statement<u>{detail::statement_constructor_arg(u{distinct, l, r})};
 }
 }  // namespace sqlpp

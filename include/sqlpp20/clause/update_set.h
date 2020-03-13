@@ -106,36 +106,6 @@ template <typename Context, typename... Assignments, typename Statement>
                                  std::get<Assignments>(t._assignments)}...));
 }
 
-SQLPP_WRAPPED_STATIC_ASSERT(assert_update_set_at_least_one_arg,
-                            "at least one assignment required in set()");
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_update_set_args_are_assignments,
-    "at least one argument is not an assignment in set()");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_update_set_args_contain_no_duplicates,
-                            "at least one duplicate column detected in set()");
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_update_set_assignments_are_allowed,
-    "at least one assignment is prohibited by its column definition in set()");
-
-template <typename... Assignments>
-constexpr auto check_update_set_arg() {
-  if constexpr (sizeof...(Assignments) == 0) {
-    return failed<assert_update_set_at_least_one_arg>{};
-  } else if constexpr (!(true && ... &&
-                         is_assignment_v<remove_optional_t<Assignments>>)) {
-    return failed<assert_update_set_args_are_assignments>{};
-  } else if constexpr (type_set<char_sequence_of_t<
-                           column_of_t<remove_optional_t<Assignments>>>...>()
-                           .size() != sizeof...(Assignments)) {
-    return failed<assert_update_set_args_contain_no_duplicates>{};
-  } else if constexpr ((false || ... ||
-                        is_read_only_v<
-                            column_of_t<remove_optional_t<Assignments>>>)) {
-    return failed<assert_update_set_assignments_are_allowed>{};
-  } else
-    return succeeded{};
-}
-
 struct no_update_set_t {};
 
 template <typename Statement>
@@ -147,15 +117,11 @@ class clause_base<no_update_set_t, Statement> {
 
   constexpr clause_base() = default;
 
-  template <typename... Assignments>
+  template <OptionalAssignment... Assignments>
+  requires(sizeof...(Assignments) > 0 and unique_assignment_columns_v<Assignments...>)
   [[nodiscard]] constexpr auto set(Assignments... assignments) const {
-    constexpr auto _check = check_update_set_arg<Assignments...>();
-    if constexpr (_check) {
-      return new_statement(
-          *this, update_set_t<Assignments...>{std::tuple{assignments...}});
-    } else {
-      return ::sqlpp::bad_expression_t{_check};
-    }
+    return new_statement(
+        *this, update_set_t<Assignments...>{std::tuple{assignments...}});
   }
 };
 

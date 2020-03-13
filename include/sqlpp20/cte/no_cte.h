@@ -30,62 +30,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/statement.h>
 
 namespace sqlpp {
-SQLPP_WRAPPED_STATIC_ASSERT(assert_cte_as_arg_is_statement,
-                            "cte.as() arg must be an sql statement");
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_cte_as_arg_has_result_row,
-    "cte.as() arg must have a result_row, e.g. a select or union");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_cte_as_arg_without_with,
-                            "cte.as() arg must not contain a WITH clause");
-
-template <typename Statement>
-constexpr auto check_cte_as_arg() {
-  if constexpr (!is_statement_v<Statement>) {
-    return failed<assert_cte_as_arg_is_statement>{};
-  } else if constexpr (!has_result_row_v<Statement>) {
-    return failed<assert_cte_as_arg_has_result_row>{};
-  } else if constexpr (not provided_ctes_of_v<Statement>.empty()) {
-    return failed<assert_cte_as_arg_without_with>{};
-  } else {
-    return succeeded{};
-  }
-}
-
 template <typename NameTag>
 struct cte_alias_t {
  public:
-  template <typename Statement>
-  [[nodiscard]] constexpr auto as(Statement s) const {
-    constexpr auto _check = check_cte_as_arg<Statement>();
-    if constexpr (_check) {
-      return cte_t<flat_t, table_spec<NameTag, type_hash<Statement>()>,
-                   Statement>{s};
-    } else {
-      return ::sqlpp::bad_expression_t{_check};
-    }
+  template <Statement Stat>
+  requires(provided_ctes_of_v<Stat>.empty())
+  [[nodiscard]] constexpr auto as(Stat s) const {
+    return cte_t<flat_t, table_spec<NameTag, type_hash<Stat>()>, Stat>{s};
   }
 };
 
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_cte_arg_is_name_tag_or_similar,
-    "cte() arg must be a named expression (e.g. column, table), or a "
-    "column/table spec, or a name tag");
-
-template <typename Tag>
-constexpr auto check_cte_args() {
-  if constexpr (std::is_same_v<name_tag_of_t<Tag>, none_t>) {
-    return failed<assert_cte_arg_is_name_tag_or_similar>{};
-  } else
-    return succeeded{};
-}
-
-template <typename NamedTypeOrTag>
-[[nodiscard]] constexpr auto cte([[maybe_unused]] NamedTypeOrTag) {
-  if constexpr (constexpr auto _check = check_cte_args<NamedTypeOrTag>();
-                _check) {
-    return cte_alias_t<name_tag_of_t<NamedTypeOrTag>>{};
-  } else {
-    return ::sqlpp::bad_expression_t{_check};
-  }
+template <Named NameTag>
+[[nodiscard]] constexpr auto cte([[maybe_unused]] NameTag) {
+  return cte_alias_t<name_tag_of_t<NameTag>>{};
 }
 }  // namespace sqlpp

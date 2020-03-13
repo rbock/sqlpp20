@@ -49,31 +49,11 @@ struct parameters_of<parameter_t<ValueType, NameTag>> {
   static constexpr auto value = type_vector<parameter_t<ValueType, NameTag>>{};
 };
 
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_parameter_as_arg_is_name_tag_or_similar,
-    "parameter() arg must be a named expression (e.g. column, table), or a "
-    "column/table spec, or a name tag");
-
-template <typename Tag>
-constexpr auto check_parameter_args() {
-  if constexpr (std::is_same_v<name_tag_of_t<Tag>, none_t>) {
-    return failed<assert_parameter_as_arg_is_name_tag_or_similar>{};
-  } else
-    return succeeded{};
-}
-
 template <typename ValueType>
 struct unnamed_parameter_t {
-  template <typename NamedTypeOrTag>
-  [[nodiscard]] constexpr auto operator()([
-      [maybe_unused]] NamedTypeOrTag) const {
-    if constexpr (constexpr auto _check =
-                      check_parameter_args<NamedTypeOrTag>();
-                  _check) {
-      return parameter_t<ValueType, name_tag_of_t<NamedTypeOrTag>>{};
-    } else {
-      return ::sqlpp::bad_expression_t{_check};
-    }
+  template <Named Tag>
+  [[nodiscard]] constexpr auto operator()([[maybe_unused]] Tag) const {
+    return parameter_t<ValueType, name_tag_of_t<Tag>>{};
   }
 };
 

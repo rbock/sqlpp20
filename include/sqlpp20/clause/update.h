@@ -63,35 +63,10 @@ template <typename Context, typename Table, typename Statement>
   return std::string("UPDATE ") + to_sql_string(context, t._table);
 }
 
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_update_arg_is_not_join,
-    "update() arg must not be a join, maybe look at vendor specific versions");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_update_arg_is_not_cte,
-                            "update() arg must not be a CTE");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_update_arg_is_table,
-                            "update() arg has to be a table");
-
-template <typename T>
-constexpr auto check_update_arg() {
-  if constexpr (is_join_v<T>) {
-    return failed<assert_update_arg_is_not_join>{};
-  } else if constexpr (is_cte_v<T>) {
-    return failed<assert_update_arg_is_not_cte>{};
-  } else if constexpr (!is_table_v<T>) {
-    return failed<assert_update_arg_is_table>{};
-  } else {
-    return succeeded{};
-  }
-}
-
-template <typename Table>
+template <PrimaryTable Table>
 [[nodiscard]] constexpr auto update(Table table) {
-  if constexpr (constexpr auto _check = check_update_arg<Table>(); _check) {
-    return statement<update_t<Table>>{table}
-           << statement<no_update_set_t, no_where_t>{};
-  } else {
-    return ::sqlpp::bad_expression_t{_check};
-  }
+  return statement<update_t<Table>>{table}
+         << statement<no_update_set_t, no_where_t>{};
 }
 
 }  // namespace sqlpp

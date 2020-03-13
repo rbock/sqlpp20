@@ -35,7 +35,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/tuple_to_sql_string.h>
 #include <sqlpp20/type_traits.h>
 #include <sqlpp20/type_vector_is_subset_of.h>
-#include <sqlpp20/unique_types.h>
 #include <sqlpp20/wrapped_static_assert.h>
 
 #include <tuple>
@@ -263,9 +262,6 @@ template <typename Context, typename Statement, typename... Assignments>
   return ret;
 }
 
-template<typename... As>
-constexpr auto unique_assignment_columns_v = unique_types_v<column_of_t<remove_optional_t<As>>...>;
-
 #warning: Assignments need to prevent read-only
 #warning: check table of assignments before executing query
 struct no_insert_values_t {};
@@ -284,18 +280,18 @@ class clause_base<no_insert_values_t, Statement> {
     return new_statement(*this, insert_default_values_t{});
   }
 
-  template <OptionalInsertAssignment A, OptionalInsertAssignment... As>
-  requires(unique_assignment_columns_v<A, As...>)
-  [[nodiscard]] constexpr auto set(A a, As... as) const {
-    using row_t = std::tuple<A, As...>;
-    return new_statement(*this, insert_values_t<A, As...>{row_t{a, as...}});
+  template <OptionalInsertAssignment... Assignments>
+  requires(sizeof...(Assignments) > 0 and unique_assignment_columns_v<Assignments...>)
+  [[nodiscard]] constexpr auto set(Assignments... as) const {
+    using row_t = std::tuple<Assignments...>;
+    return new_statement(*this, insert_values_t<Assignments...>{row_t{as...}});
   }
 
-  template <OptionalInsertAssignment A, OptionalInsertAssignment... As>
-  requires(unique_assignment_columns_v<A, As...>)
+  template <OptionalInsertAssignment... Assignments>
+  requires(sizeof...(Assignments) > 0 and unique_assignment_columns_v<Assignments...>)
   [[nodiscard]] constexpr auto multiset(
-      std::vector<std::tuple<A, As...>> assignments) const {
-    return new_statement(*this, insert_multi_values_t<A, As...>{assignments});
+      std::vector<std::tuple<Assignments...>> assignments) const {
+    return new_statement(*this, insert_multi_values_t<Assignments...>{assignments});
   }
 };
 
