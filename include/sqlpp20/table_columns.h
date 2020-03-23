@@ -31,12 +31,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/type_traits.h>
 
 namespace sqlpp {
-template <typename TableSpec, typename TypeVector>
+export template <typename TableSpec, typename TypeVector>
 struct table_columns {
   static_assert(wrong<table_columns>, "Invalid arguments for table_columns");
 };
 
-template <typename TableSpec, typename... ColumnSpecs>
+export template <typename TableSpec, typename... ColumnSpecs>
 struct table_columns<TableSpec, type_vector<ColumnSpecs...>>
     : public member_t<ColumnSpecs, column_t<TableSpec, ColumnSpecs>>... {};
 

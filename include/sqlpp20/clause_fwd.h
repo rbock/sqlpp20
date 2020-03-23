@@ -35,7 +35,7 @@ class statement;
 template <typename... Clauses>
 class prepared_statement;
 
-template <typename Clause, typename Statement>
+export template <typename Clause, typename Statement>
 class clause_base {
   static_assert(wrong<clause_base>, "Missing specialization for clause_base");
 };

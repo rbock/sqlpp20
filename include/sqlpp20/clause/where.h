@@ -45,7 +45,7 @@ struct nodes_of<where_t<Condition>> {
 template <typename Table>
 constexpr auto clause_tag<where_t<Table>> = ::std::string_view{"where"};
 
-template <typename Condition, typename Statement>
+export template <typename Condition, typename Statement>
 class clause_base<where_t<Condition>, Statement> {
  public:
   template <typename OtherStatement>
@@ -86,7 +86,7 @@ template <typename Context, typename Statement>
 
 struct no_where_t {};
 
-template <typename Statement>
+export template <typename Statement>
 class clause_base<no_where_t, Statement> {
  public:
   template <typename OtherStatement>
@@ -106,18 +106,18 @@ class clause_base<no_where_t, Statement> {
   }
 };
 
-template <typename Context, typename Statement>
+export template <typename Context, typename Statement>
 [[nodiscard]] auto to_sql_string(Context& context,
                                  const clause_base<no_where_t, Statement>&) {
   return std::string{};
 }
 
-template <typename Condition>
+export template <typename Condition>
 [[nodiscard]] constexpr auto where(Condition&& condition) {
   return statement<no_where_t>{}.where(std::forward<Condition>(condition));
 }
 
-[[nodiscard]] constexpr auto unconditionally() {
+export [[nodiscard]] constexpr auto unconditionally() {
   return statement<no_where_t>{}.unconditionally();
 }
 }  // namespace sqlpp

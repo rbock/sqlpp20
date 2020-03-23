@@ -34,7 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace sqlpp {
 class result_end_t {};
 
-template <typename ResultHandle>
+export template <typename ResultHandle>
 struct result_t {
   using _row_t = typename ResultHandle::row_type;
   ResultHandle _handle;

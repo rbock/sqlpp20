@@ -110,7 +110,7 @@ SQLPP_WRAPPED_STATIC_ASSERT(
     assert_execute_without_parameters,
     "directly executed statements must have no parameters");
 
-template <typename Db, typename... Clauses>
+export template <typename Db, typename... Clauses>
 constexpr auto check_statement_executable(
     const type_t<statement<Clauses...>>& s) {
   if constexpr (parameters_of_v<statement<Clauses...>>.size() != 0) {
@@ -119,7 +119,7 @@ constexpr auto check_statement_executable(
     return check_statement_preparable<Db>(s);
 }
 
-template <typename... Clauses>
+export template <typename... Clauses>
 class statement : public clause_base<Clauses, statement<Clauses...>>... {
  public:
   constexpr statement() {}
@@ -168,7 +168,7 @@ struct result_row_of<statement<Clauses...>> {
 SQLPP_WRAPPED_STATIC_ASSERT(assert_statement_contains_unique_clauses,
                             "statements must contain unique clauses only");
 
-template <typename... Clauses>
+export template <typename... Clauses>
 constexpr auto check_statement_clauses() {
   if constexpr (not detail::have_unique_clauses(
                     ::sqlpp::type_vector<Clauses...>{})) {
@@ -177,7 +177,7 @@ constexpr auto check_statement_clauses() {
     return succeeded{};
 }
 
-template <typename Context, typename... Clauses>
+export template <typename Context, typename... Clauses>
 [[nodiscard]] auto to_sql_string(Context& context,
                                  const statement<Clauses...>& t) {
   return (
@@ -187,7 +187,7 @@ template <typename Context, typename... Clauses>
           static_cast<const clause_base<Clauses, statement<Clauses...>>&>(t)));
 }
 
-template <typename... LClauses, typename... RClauses>
+export template <typename... LClauses, typename... RClauses>
 constexpr auto operator<<(statement<LClauses...> l, statement<RClauses...> r) {
   constexpr auto _check = check_statement_clauses<LClauses..., RClauses...>();
   if constexpr (_check) {

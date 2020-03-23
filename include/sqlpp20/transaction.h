@@ -29,7 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <utility>
 
 namespace sqlpp {
-template <typename Connection>
+export template <typename Connection>
 class transaction_t {
   static_assert(noexcept(std::declval<Connection>().destroy_transaction()));
 

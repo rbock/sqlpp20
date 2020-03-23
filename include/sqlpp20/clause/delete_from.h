@@ -44,7 +44,7 @@ template <typename Tab>
 constexpr auto clause_tag<delete_from_t<Tab>> =
     ::std::string_view{"delete_from"};
 
-template <typename Tab, typename Statement>
+export template <typename Tab, typename Statement>
 class clause_base<delete_from_t<Tab>, Statement> {
  public:
   template <typename OtherStatement>
@@ -64,13 +64,13 @@ struct clause_result_type<delete_from_t<Tab>> {
   using type = delete_result;
 };
 
-template <typename Context, typename Tab, typename Statement>
+export template <typename Context, typename Tab, typename Statement>
 [[nodiscard]] auto to_sql_string(
     Context& context, const clause_base<delete_from_t<Tab>, Statement>& t) {
   return std::string{"DELETE FROM "} + to_sql_string(context, t._table);
 }
 
-template <PrimaryTable Tab>
+export template <PrimaryTable Tab>
 [[nodiscard]] constexpr auto delete_from(Tab tab) {
     return statement<delete_from_t<Tab>>{tab} << statement<no_where_t>{};
 }

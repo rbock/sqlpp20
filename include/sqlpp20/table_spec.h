@@ -29,7 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/type_traits.h>
 
 namespace sqlpp {
-template <typename NameTag, std::uint32_t TableHash>
+export template <typename NameTag, std::uint32_t TableHash>
 struct table_spec : public ::sqlpp::spec_base {
   using _sqlpp_name_tag = NameTag;
 };

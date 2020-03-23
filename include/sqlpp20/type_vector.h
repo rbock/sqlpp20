@@ -27,7 +27,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 namespace sqlpp {
-template <typename... Elements>
+export template <typename... Elements>
 struct type_vector {
   [[nodiscard]] static constexpr auto size() { return sizeof...(Elements); }
 

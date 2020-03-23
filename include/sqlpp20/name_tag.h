@@ -26,10 +26,6 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <sqlpp20/type_traits.h>
-
-#include <string_view>
-
 #define SQLPP_NAME_TAG_GUTS(SQL_NAME, CPP_NAME)             \
   /* would like to make this a function, but clang crashes, \
      see https://bugs.llvm.org/show_bug.cgi?id=35829)*/     \

@@ -45,9 +45,9 @@ struct default_value_t;
 
 struct none_t {};
 
-struct name_tag_base {};
+export struct name_tag_base {};
 
-struct spec_base {};
+export struct spec_base {};
 
 template <typename T>
 constexpr auto is_read_only_v = false;
@@ -60,7 +60,7 @@ constexpr auto is_read_only_v<auto_increment_t> = true;
 template <typename T>
 struct type_t {};
 
-template <typename T>
+export template <typename T>
 constexpr auto type_v = type_t<T>{};
 
 struct boolean_t;
@@ -104,11 +104,11 @@ inline constexpr auto is_insert_required_pred = is_insert_required_pred_t{};
 
 struct no_result;
 
-struct insert_result;
-struct update_result;
-struct delete_result;
-struct select_result;
-struct execute_result;
+export struct insert_result;
+export struct update_result;
+export struct delete_result;
+export struct select_result;
+export struct execute_result;
 
 template <typename T>
 struct result_clause_of {
@@ -123,7 +123,7 @@ struct result_type_of {
   using type = no_result;
 };
 
-template <typename T>
+export template <typename T>
 using result_type_of_t = typename result_type_of<T>::type;
 
 template <typename T>
@@ -189,7 +189,7 @@ struct result_row_of {
   using type = none_t;
 };
 
-template <typename T>
+export template <typename T>
 using result_row_of_t = typename result_row_of<T>::type;
 
 template <typename T>
@@ -455,7 +455,7 @@ constexpr auto is_boolean_v = std::is_same_v<T, bool>;
 template <>
 constexpr auto is_boolean_v<std::nullopt_t> = true;
 
-template <typename T>
+export template <typename T>
 constexpr auto has_boolean_value_v =
     is_boolean_v<remove_optional_t<T>> or
     is_boolean_v<remove_optional_t<value_type_of_t<T>>>;
@@ -500,7 +500,7 @@ constexpr auto is_numeric_v<numeric_t> = true;
 template <>
 constexpr auto is_numeric_v<std::nullopt_t> = true;
 
-template <typename T>
+export template <typename T>
 constexpr auto has_numeric_value_v =
     is_numeric_v<remove_optional_t<T>> or
     is_numeric_v<remove_optional_t<value_type_of_t<T>>>;
@@ -523,7 +523,7 @@ constexpr auto is_text_v<std::string_view> = true;
 template <>
 constexpr auto is_text_v<std::nullopt_t> = true;
 
-template <typename T>
+export template <typename T>
 constexpr auto has_text_value_v =
     is_text_v<remove_optional_t<T>> or
     is_text_v<remove_optional_t<value_type_of_t<T>>>;
@@ -540,7 +540,7 @@ struct requires_braces : std::false_type {};
 template <typename T>
 constexpr auto requires_braces_v = requires_braces<T>::value;
 
-template <typename T>
+export template <typename T>
 struct parameters_of {
   static constexpr auto value = parameters_of<nodes_of_t<T>>::value;
 };
@@ -548,7 +548,7 @@ struct parameters_of {
 template <typename T>
 inline constexpr auto parameters_of_v = parameters_of<T>::value;
 
-template <typename T>
+export template <typename T>
 using parameters_of_t = std::decay_t<decltype(parameters_of<T>::value)>;
 
 template <typename... T>

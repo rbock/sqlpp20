@@ -32,7 +32,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/type_traits.h>
 
 namespace sqlpp {
-template <typename TableSpec, typename ColumnSpec>
+export template <typename TableSpec, typename ColumnSpec>
 class column_t {
   static_assert(std::is_base_of_v<::sqlpp::spec_base, TableSpec>);
   static_assert(std::is_base_of_v<::sqlpp::spec_base, ColumnSpec>);
@@ -76,7 +76,7 @@ class column_t {
   [[nodiscard]] constexpr auto desc() const { return ::sqlpp::desc(*this); }
 };
 
-template <typename TableSpec, typename ColumnSpec>
+export template <typename TableSpec, typename ColumnSpec>
 struct value_type_of<column_t<TableSpec, ColumnSpec>> {
   using type = typename ColumnSpec::value_type;
 };
@@ -124,7 +124,7 @@ template <typename... ProvidedTables, typename TableSpec, typename ColumnSpec>
   return (true and ... and (not std::is_same_v<ProvidedTables, TableSpec>));
 }
 
-template <typename Context, typename TableSpec, typename ColumnSpec>
+export template <typename Context, typename TableSpec, typename ColumnSpec>
 [[nodiscard]] auto to_sql_string(Context& context,
                                  const column_t<TableSpec, ColumnSpec>& t) {
   return to_sql_name(context, TableSpec{}) + "." +

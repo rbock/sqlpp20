@@ -27,6 +27,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 namespace sqlpp {
-struct context_base {};
+export struct context_base {};
 
 }  // namespace sqlpp

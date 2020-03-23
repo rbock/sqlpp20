@@ -30,7 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/type_traits.h>
 
 namespace sqlpp {
-template <typename L, typename Operator, typename R>
+export template <typename L, typename Operator, typename R>
 struct comparison_t {
   L l;
   R r;
@@ -49,7 +49,7 @@ struct value_type_of<comparison_t<L, Operator, R>> {
 template <typename L, typename Operator, typename R>
 constexpr auto requires_braces_v<comparison_t<L, Operator, R>> = true;
 
-template <typename Context, typename L, typename Operator, typename R>
+export template <typename Context, typename L, typename Operator, typename R>
 [[nodiscard]] auto to_sql_string(Context& context,
                                  const comparison_t<L, Operator, R>& t) {
   return to_sql_string(context, embrace(t.l)) + Operator::symbol +

@@ -29,7 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/type_traits.h>
 
 namespace sqlpp {
-template <uint8_t Size>
+export template <uint8_t Size>
 struct fixchar {};
 
 template <uint8_t Size>
@@ -40,7 +40,7 @@ struct cpp_type<fixchar<Size>> {
   using type = std::string_view;
 };
 
-template <uint8_t Size>
+export template <uint8_t Size>
 struct varchar {};
 
 template <uint8_t Size>

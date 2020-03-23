@@ -26,10 +26,9 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <sqlpp20/data_types.h>
-#include <sqlpp20/name_tag.h>
-#include <sqlpp20/table.h>
+import sqlpp20;
 
+#include <sqlpp20/name_tag.h>
 #include <string_view>
 
 namespace test {

@@ -35,23 +35,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 
 namespace sqlpp {
-template <typename Context, typename T>
+export template <typename Context, typename T>
 [[nodiscard]] auto to_sql_string(Context& context, const std::optional<T>& o) {
   return o ? to_sql_string(context, o.value()) : "NULL";
 }
 
-template <typename Context>
+export template <typename Context>
 [[nodiscard]] auto to_sql_string(Context& context,
                                  [[maybe_unused]] const std::nullopt_t&) {
   return "NULL";
 }
 
-template <typename Context>
+export template <typename Context>
 [[nodiscard]] auto to_sql_string(Context& context, const char& c) {
   return std::string(1, c);
 }
 
-template <typename Context>
+export template <typename Context>
 [[nodiscard]] auto to_sql_string(Context& context, const std::string_view& s) {
   auto ret = std::string{"'"};
   for (const auto c : s) {
@@ -62,7 +62,7 @@ template <typename Context>
   return ret;
 }
 
-template <typename Context, typename T>
+export template <typename Context, typename T>
 requires(std::is_integral_v<T>)
     [[nodiscard]] auto to_sql_string(Context& context, const T& i)
         -> std::string {
@@ -106,7 +106,7 @@ requires(std::is_floating_point_v<T>)
 }
 
 // This version will bind to a temporary context, all others won't
-template <typename Context, typename T>
+export template <typename Context, typename T>
 [[nodiscard]] auto to_sql_string_c(Context context, const T& t) {
   return to_sql_string(context, t);
 }

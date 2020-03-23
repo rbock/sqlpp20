@@ -1,4 +1,4 @@
-# Copyright (c) 2017 - 2020, Roland Bock
+# Copyright (c) 2020, Roland Bock
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification,
@@ -22,23 +22,32 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-add_library(sqlpp20_testing INTERFACE)
+SET(SQLPP20_MODULE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/sqlpp20.cpp")
+SET(SQLPP20_MODULE "${CMAKE_CURRENT_BINARY_DIR}/sqlpp20.pcm")
 
-function(test_target name type)
-  set(target sqlpp20_test_${type}_${name})
-  add_executable(${target} ${name}.cpp)
-  add_dependencies(${target} ModSqlpp20)
-  target_link_libraries(${target} PRIVATE sqlpp20 sqlpp20_testing)
-  target_compile_options(${target} PRIVATE -std=c++20 -fcolor-diagnostics -fmodules -fimplicit-modules -fimplicit-module-maps -fprebuilt-module-path=${CMAKE_BINARY_DIR}/module)
-  add_test(${target} ${target})
-endfunction()
+add_custom_command(
+    OUTPUT 
+        ${SQLPP20_MODULE}
+    COMMAND 
+        /usr/local/clang-trunk/bin/clang++ 
+                -std=c++20 
+                -stdlib=libc++ 
+                -fmodules 
+                ${SQLPP20_MODULE_SRC}
+                -I"${CMAKE_CURRENT_SOURCE_DIR}/../include"
+                -c 
+                -Xclang -emit-module-interface 
+                -o ${SQLPP20_MODULE}
+    COMMENT 
+        "Creating ${SQLPP20_MODULE}"
+    DEPENDS
+        sqlpp20
+        ${SQLPP20_MODULE_SRC}
+)
 
-target_include_directories(sqlpp20_testing INTERFACE
-  $<BUILD_INTERFACE:${sqlpp20_SOURCE_DIR}/tests/include>
-  )
-
-add_subdirectory(usage)
-add_subdirectory(serialize)
-add_subdirectory(static_assert)
-add_subdirectory(type_traits)
+add_custom_target(ModSqlpp20 
+    DEPENDS 
+        ${SQLPP20_MODULE}
+    VERBATIM
+)
 

@@ -35,13 +35,13 @@ template <typename ParameterSpec>
 using parameter_base_t =
     member_t<name_tag_of_t<ParameterSpec>, value_type_of_t<ParameterSpec>>;
 
-template <typename ParameterSpecVector>
+export template <typename ParameterSpecVector>
 struct prepared_statement_parameters {
   static_assert(wrong<ParameterSpecVector>,
                 "wrong template argument for prepared_statement_parameters");
 };
 
-template <typename... ParameterSpecs>
+export template <typename... ParameterSpecs>
 class prepared_statement_parameters<type_vector<ParameterSpecs...>>
     : public parameter_base_t<ParameterSpecs>... {};
 

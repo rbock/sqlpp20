@@ -30,7 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string_view>
 
 namespace sqlpp {
-struct connection {};
+export struct connection {};
 
 enum class debug { none, allowed };
 

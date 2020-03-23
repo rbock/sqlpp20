@@ -29,10 +29,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <type_traits>
 
 namespace sqlpp {
-template <typename T>
+export template <typename T>
 struct failed;
 
-struct succeeded : public std::true_type {
+export struct succeeded : public std::true_type {
   constexpr auto operator&&(const succeeded&) { return succeeded{}; }
 
   template <typename T>

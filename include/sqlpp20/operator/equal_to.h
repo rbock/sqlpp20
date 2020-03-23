@@ -33,19 +33,19 @@ struct equal_to_t {
   static constexpr auto symbol = " = ";
 };
 
-template <typename L, typename R>
+export template <typename L, typename R>
 requires(has_text_value_v<L>and has_text_value_v<R>) constexpr auto operator==(
     L l, R r) {
   return comparison_t<L, equal_to_t, R>{l, r};
 }
 
-template <typename L, typename R>
+export template <typename L, typename R>
 requires(has_numeric_value_v<L>and has_numeric_value_v<R>) constexpr auto
 operator==(L l, R r) {
   return comparison_t<L, equal_to_t, R>{l, r};
 }
 
-template <typename L, typename R>
+export template <typename L, typename R>
 requires(has_boolean_value_v<L>and has_boolean_value_v<R>) constexpr auto
 operator==(L l, R r) {
   return comparison_t<L, equal_to_t, R>{l, r};

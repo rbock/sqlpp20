@@ -35,9 +35,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/type_traits.h>
 
 namespace sqlpp {
-template <typename TableSpec>
-class table_t : public join_functions<table_t<TableSpec>>,
-                public table_columns<TableSpec, typename TableSpec::_columns> {
+export template <typename TableSpec>
+class table_t
+    : public join_functions<table_t<TableSpec>>,
+      public table_columns<TableSpec, typename TableSpec::_columns> {
  public:
   template <typename NamedTypeOrTag>
   [[nodiscard]] constexpr auto as([
@@ -70,7 +71,7 @@ struct table_spec_of<table_t<TableSpec>> {
   using type = TableSpec;
 };
 
-template <typename Context, typename TableSpec>
+export template <typename Context, typename TableSpec>
 [[nodiscard]] auto to_sql_string(Context& context,
                                  const table_t<TableSpec>& t) {
   return to_sql_name(context, t);

@@ -32,7 +32,7 @@ namespace sqlpp {
 template <typename Assert>
 struct failed;
 
-template <typename Failure>
+export template <typename Failure>
 struct bad_expression_t {
   static_assert(wrong<Failure>, "Missing specialization");
 

@@ -89,7 +89,7 @@ template <Table Lhs, OptionalTable Rhs>
   return detail::cross_join_impl(lhs, rhs);
 }
 
-template <typename Derived>
+export template <typename Derived>
 class join_functions {
   constexpr decltype(auto) ref() const {
     return static_cast<const Derived&>(*this);

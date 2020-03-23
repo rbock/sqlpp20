@@ -26,12 +26,9 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <sqlpp20/connection.h>
-#include <sqlpp20/context_base.h>
-#include <sqlpp20/prepared_statement_parameters.h>
-#include <sqlpp20/result.h>
-#include <sqlpp20/statement.h>
-#include <sqlpp20/transaction.h>
+import sqlpp20;
+
+#include <type_traits>
 
 namespace sqlpp::test {
 struct mock_context_t : public ::sqlpp::context_base {};

@@ -27,6 +27,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 namespace sqlpp {
-template <typename... T>
+export template <typename... T>
 constexpr auto wrong = false;
 }
