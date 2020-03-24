@@ -24,7 +24,10 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <sqlpp20/to_sql_string.h>
+import <cmath>;
+import <array>;
+import <string>;
+import sqlpp20;
 #include <sqlpp20_test/mock_db.h>
 
 #include "assert_equality.h"

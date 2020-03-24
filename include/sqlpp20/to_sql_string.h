@@ -29,9 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/exception.h>
 
 #include <cmath>
-#include <iomanip>
 #include <optional>
-#include <sstream>
 #include <string>
 
 namespace sqlpp {
@@ -69,25 +67,25 @@ requires(std::is_integral_v<T>)
   return std::to_string(i);
 }
 
-template <typename Context>
+export template <typename Context>
 [[nodiscard]] auto nan_to_sql_string(Context& context) -> std::string {
   throw ::sqlpp::exception(
       "Serialization of NaN is not supported by this connector");
 }
 
-template <typename Context>
+export template <typename Context>
 [[nodiscard]] auto inf_to_sql_string(Context& context) -> std::string {
   throw ::sqlpp::exception(
       "Serialization of Infinity is not supported by this connector");
 }
 
-template <typename Context>
+export template <typename Context>
 [[nodiscard]] auto neg_inf_to_sql_string(Context& context) -> std::string {
   throw ::sqlpp::exception(
       "Serialization of Infinity is not supported by this connector");
 }
 
-template <typename Context, typename T>
+export template <typename Context, typename T>
 requires(std::is_floating_point_v<T>)
     [[nodiscard]] auto to_sql_string(Context& context, const T& f)
         -> std::string {
@@ -98,10 +96,7 @@ requires(std::is_floating_point_v<T>)
                                              : neg_inf_to_sql_string(context);
   } else {
     // TODO: Once gcc and clang support to_chars, try that
-    auto oss = std::ostringstream{};
-    oss << std::setprecision(std::numeric_limits<long double>::digits10 + 1)
-        << f;
-    return oss.str();
+    return std::to_string(f);
   }
 }
 

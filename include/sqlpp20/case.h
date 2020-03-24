@@ -60,7 +60,7 @@ struct nodes_of<when_then_t<When, Then>> {
   using type = type_vector<When, Then>;
 };
 
-template <typename... WhenThens>
+export template <typename... WhenThens>
 struct case_when_then_t {
   std::tuple<WhenThens...> _when_thens;
 
@@ -96,32 +96,32 @@ struct value_type_of<when_then_t<When, Then>> {
   using type = value_type_of_t<Then>;
 };
 
-template <typename Context, typename When, typename Then>
+export template <typename Context, typename When, typename Then>
 [[nodiscard]] auto to_sql_string(Context& context,
                                  const when_then_t<When, Then>& t) {
   return std::string{" WHEN "} + to_sql_string(context, embrace(t._when)) +
          " THEN " + to_sql_string(context, embrace(t._then));
 }
 
-template <typename Context, typename... WhenThens>
+export template <typename Context, typename... WhenThens>
 [[nodiscard]] auto to_sql_string(Context& context,
                                  const case_when_then_t<WhenThens...>& t) {
   return std::string{" CASE"} + tuple_to_sql_string(context, "", t._when_thens);
 }
 
-template <typename Context, typename CaseWhenThen, typename Else>
+export template <typename Context, typename CaseWhenThen, typename Else>
 [[nodiscard]] auto to_sql_string(
     Context& context, const case_when_then_else_t<CaseWhenThen, Else>& t) {
   return to_sql_string(context, t._case_when_then) + " ELSE " +
          to_sql_string(context, embrace(t._else));
 }
 
-template <Expression Then>
+export template <Expression Then>
 [[nodiscard]] constexpr auto then(Then expr) {
     return then_t<Then>{expr};
 }
 
-template <typename When, Expression Then>
+export template <typename When, Expression Then>
 requires(has_boolean_value_v<When>)
 [[nodiscard]] constexpr auto case_when(When when, then_t<Then> then) {
     auto wt = when_then_t<When, Then>{when, then._expr};

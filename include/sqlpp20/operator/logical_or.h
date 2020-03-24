@@ -29,11 +29,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/logical.h>
 
 namespace sqlpp {
-struct logical_or_t {
+export struct logical_or_t {
   static constexpr auto symbol = " OR ";
 };
 
-template <typename L, typename R>
+export template <typename L, typename R>
 requires(has_boolean_value_v<L>and has_boolean_value_v<R>) constexpr auto
 operator||(L l, R r) {
   return logical_t<L, logical_or_t, R>{l, r};

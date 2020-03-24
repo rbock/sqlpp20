@@ -62,7 +62,7 @@ template <with_mode Mode, typename... CommonTableExpressions>
 constexpr auto clause_tag<with_t<Mode, CommonTableExpressions...>> =
     ::std::string_view{"with"};
 
-template <with_mode Mode, typename... CommonTableExpressions,
+export template <with_mode Mode, typename... CommonTableExpressions,
           typename Statement>
 class clause_base<with_t<Mode, CommonTableExpressions...>, Statement> {
  public:
@@ -77,7 +77,7 @@ class clause_base<with_t<Mode, CommonTableExpressions...>, Statement> {
   std::tuple<CommonTableExpressions...> _ctes;
 };
 
-template <typename Context>
+export template <typename Context>
 [[nodiscard]] auto to_sql_string(Context& context, with_mode mode) {
   switch (mode) {
     case with_mode::flat:
@@ -87,7 +87,7 @@ template <typename Context>
   }
 }
 
-template <typename Context, with_mode Mode, typename... CommonTableExpressions,
+export template <typename Context, with_mode Mode, typename... CommonTableExpressions,
           typename Statement>
 [[nodiscard]] auto to_sql_string(
     Context& context,
@@ -103,7 +103,7 @@ template <typename Context, with_mode Mode, typename... CommonTableExpressions,
 
 struct no_with_t {};
 
-template <typename Statement>
+export template <typename Statement>
 class clause_base<no_with_t, Statement> {
  public:
   template <typename OtherStatement>
@@ -126,19 +126,19 @@ class clause_base<no_with_t, Statement> {
   }
 };
 
-template <typename Context, typename Statement>
+export template <typename Context, typename Statement>
 [[nodiscard]] auto to_sql_string(Context& context,
                                  const clause_base<no_with_t, Statement>&) {
   return std::string{};
 }
 
-template <typename... CommonTableExpressions>
+export template <typename... CommonTableExpressions>
 [[nodiscard]] constexpr auto with(CommonTableExpressions&&... ctes) {
   return statement<no_with_t>{}.with(
       std::forward<CommonTableExpressions...>(ctes...));
 }
 
-template <typename... CommonTableExpressions>
+export template <typename... CommonTableExpressions>
 [[nodiscard]] constexpr auto with_recursive(CommonTableExpressions&&... ctes) {
   return statement<no_with_t>{}.with_recursive(
       std::forward<CommonTableExpressions...>(ctes...));

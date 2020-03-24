@@ -46,7 +46,7 @@ struct cte_columns_t<TableSpec, result_row_t<ResultColumnSpecs...>>
 struct flat_t;
 struct recursive_t;
 
-template <typename CteType, typename TableSpec, typename Stat>
+export template <typename CteType, typename TableSpec, typename Stat>
 struct cte_t;
 
 namespace detail {
@@ -57,7 +57,7 @@ template <typename TableSpec, typename... ResultColumnSpecs>
 }
 }  // namespace detail
 
-template <typename CteType, typename TableSpec, typename Stat>
+export template <typename CteType, typename TableSpec, typename Stat>
 struct cte_t : cte_columns_t<TableSpec, result_row_of_t<Stat>> {
   Stat _statement;
 
@@ -128,7 +128,7 @@ struct name_tag_of<cte_t<CteType, TableSpec, Stat>> {
   using type = name_tag_of_t<TableSpec>;
 };
 
-template <typename Context, typename CteType, typename TableSpec,
+export template <typename Context, typename CteType, typename TableSpec,
           typename Stat>
 [[nodiscard]] auto to_full_sql_string(
     Context& context, const cte_t<CteType, TableSpec, Stat>& t) {
@@ -136,7 +136,7 @@ template <typename Context, typename CteType, typename TableSpec,
          to_sql_string(context, t._statement) + ")";
 }
 
-template <typename Context, typename CteType, typename TableSpec,
+export template <typename Context, typename CteType, typename TableSpec,
           typename Stat>
 [[nodiscard]] auto to_sql_string(
     Context& context, const cte_t<CteType, TableSpec, Stat>& t) {

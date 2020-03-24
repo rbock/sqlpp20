@@ -30,7 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/statement.h>
 
 namespace sqlpp {
-template <typename NameTag>
+export template <typename NameTag>
 struct cte_alias_t {
  public:
   template <Statement Stat>
@@ -40,7 +40,7 @@ struct cte_alias_t {
   }
 };
 
-template <Named NameTag>
+export template <Named NameTag>
 [[nodiscard]] constexpr auto cte([[maybe_unused]] NameTag) {
   return cte_alias_t<name_tag_of_t<NameTag>>{};
 }
