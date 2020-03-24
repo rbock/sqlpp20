@@ -45,7 +45,7 @@ struct nodes_of<limit_t<Number>> {
 template <typename Number>
 constexpr auto clause_tag<limit_t<Number>> = ::std::string_view{"limit"};
 
-template <typename Number, typename Statement>
+export template <typename Number, typename Statement>
 class clause_base<limit_t<Number>, Statement> {
  public:
   template <typename OtherStatement>
@@ -81,7 +81,7 @@ template <typename Context, typename Number, typename Statement>
 
 struct no_limit_t {};
 
-template <typename Statement>
+export template <typename Statement>
 class clause_base<no_limit_t, Statement> {
  public:
   template <typename OtherStatement>
@@ -102,7 +102,7 @@ template <typename Context, typename Statement>
   return std::string{};
 }
 
-template <typename Value>
+export template <typename Value>
 requires(std::is_integral_v<Value>)
 [[nodiscard]] constexpr auto limit(Value&& value) {
   return statement<no_limit_t>{}.limit(std::forward<Value>(value));

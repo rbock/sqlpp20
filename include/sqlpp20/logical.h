@@ -31,7 +31,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/type_traits.h>
 
 namespace sqlpp {
-template <typename L, typename Operator, typename R>
+export template <typename L, typename Operator, typename R>
 struct logical_t {
   logical_t() = delete;
   constexpr logical_t(L l, R r) : _l(l), _r(r) {}

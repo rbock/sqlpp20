@@ -171,7 +171,8 @@ class mock_db : public ::sqlpp::connection {
   template <typename Statement>
   auto select(const Statement& statement) {
     [[maybe_unused]] auto x = to_sql_string_c(mock_context_t{}, statement);
-    return ::sqlpp::result_t<mock_result<result_row_of_t<Statement>>>{{}};
+    return ::sqlpp::result_t<mock_result<result_row_of_t<Statement>>>{
+        mock_result<result_row_of_t<Statement>>{}};
   }
 };
 

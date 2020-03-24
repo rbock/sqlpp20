@@ -24,6 +24,7 @@
 
 SET(SQLPP20_MODULE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/sqlpp20.cpp")
 SET(SQLPP20_MODULE "${CMAKE_CURRENT_BINARY_DIR}/sqlpp20.pcm")
+FILE(GLOB_RECURSE SQLPP20_MODULE_DEPS "${CMAKE_CURRENT_SOURCE_DIR}/../include/sqlpp20/*.h")
 
 add_custom_command(
     OUTPUT 
@@ -41,8 +42,8 @@ add_custom_command(
     COMMENT 
         "Creating ${SQLPP20_MODULE}"
     DEPENDS
-        sqlpp20
         ${SQLPP20_MODULE_SRC}
+        ${SQLPP20_MODULE_DEPS}
 )
 
 add_custom_target(ModSqlpp20 

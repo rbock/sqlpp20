@@ -48,7 +48,7 @@ template <typename TableSpec, typename... ColumnSpecs>
           t)()...};
 }
 
-template <typename TableSpec, typename... ColumnSpecs>
+export template <typename TableSpec, typename... ColumnSpecs>
 [[nodiscard]] constexpr auto all_of(
     const table_columns<TableSpec, type_vector<ColumnSpecs...>>& t) {
   return std::tuple{column_t<TableSpec, ColumnSpecs>{}...};

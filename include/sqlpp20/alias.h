@@ -31,7 +31,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/type_traits.h>
 
 namespace sqlpp {
-template <typename Expression, typename NameTag>
+export template <typename Expression, typename NameTag>
 struct alias_t {
   using _alias_t = NameTag;
   Expression _expression;

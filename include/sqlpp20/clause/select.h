@@ -45,7 +45,7 @@ struct select_t {};
 template <>
 constexpr auto clause_tag<select_t> = ::std::string_view{"select"};
 
-template <typename Statement>
+export template <typename Statement>
 class clause_base<select_t, Statement> {
  public:
   template <typename OtherStatement>
@@ -54,7 +54,7 @@ class clause_base<select_t, Statement> {
   clause_base() = default;
 };
 
-template <typename Context, typename Statement>
+export template <typename Context, typename Statement>
 [[nodiscard]] auto to_sql_string(Context& context,
                                  const clause_base<select_t, Statement>& t) {
   return std::string{"SELECT"};
@@ -62,7 +62,7 @@ template <typename Context, typename Statement>
 
 // select with no args or an empty tuple yields a blank select statement
 
-[[nodiscard]] constexpr auto select() {
+export [[nodiscard]] constexpr auto select() {
   return statement<select_t, no_select_flags_t, no_select_columns_t, no_from_t,
                    no_where_t, no_group_by_t, no_having_t, no_order_by_t,
                    no_limit_t, no_offset_t, no_lock_t>{};
@@ -70,17 +70,17 @@ template <typename Context, typename Statement>
 
 // select with at least one argument will either create flags or columns
 
-template <SelectFlag... Fs>
+export template <SelectFlag... Fs>
 [[nodiscard]] constexpr auto select(Fs... fs) {
     return ::sqlpp::select().flags(fs...);
 }
 
-template <Selectable... Fs>
+export template <Selectable... Fs>
 [[nodiscard]] constexpr auto select(Fs... fs) {
     return ::sqlpp::select().columns(fs...);
 }
 
-template <Selectable F, Selectable... Fs>
+export template <Selectable F, Selectable... Fs>
 [[nodiscard]] constexpr auto select(std::tuple<F, Fs...> fs) {
   return ::sqlpp::select().columns(fs);
 }

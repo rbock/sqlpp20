@@ -31,7 +31,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/type_traits.h>
 
 namespace sqlpp {
-template <typename FunctionSpec, typename Expression>
+export template <typename FunctionSpec, typename Expression>
 struct aggregate_t {
   aggregate_t() = delete;
   constexpr aggregate_t(Expression expression) : _expression(expression) {}

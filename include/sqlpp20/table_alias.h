@@ -72,7 +72,7 @@ template <typename Table, typename AliasTableSpec, typename TableSpec>
 constexpr auto columns_of_v<table_alias_t<Table, AliasTableSpec, TableSpec>> =
     columns_of_v<table_columns<AliasTableSpec, typename TableSpec::_columns>>;
 
-template <typename Table, typename AliasTableSpec, typename TableSpec>
+export template <typename Table, typename AliasTableSpec, typename TableSpec>
 [[nodiscard]] constexpr auto all_of(
     const table_alias_t<Table, AliasTableSpec, TableSpec>& t) {
   return column_tuple_of(t);

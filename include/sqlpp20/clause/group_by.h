@@ -53,7 +53,7 @@ struct provided_aggregates_of<group_by_t<Expressions...>> {
 template <typename Table>
 constexpr auto clause_tag<group_by_t<Table>> = ::std::string_view{"group_by"};
 
-template <typename... Expressions, typename Statement>
+export template <typename... Expressions, typename Statement>
 class clause_base<group_by_t<Expressions...>, Statement> {
  public:
   template <typename OtherStatement>
@@ -75,7 +75,7 @@ template <typename Context, typename... Expressions, typename Statement>
 
 struct no_group_by_t {};
 
-template <typename Statement>
+export template <typename Statement>
 class clause_base<no_group_by_t, Statement> {
  public:
   template <typename OtherStatement>
@@ -93,13 +93,13 @@ class clause_base<no_group_by_t, Statement> {
   }
 };
 
-template <typename Context, typename Statement>
+export template <typename Context, typename Statement>
 [[nodiscard]] auto to_sql_string(
     Context& context, const clause_base<no_group_by_t, Statement>& t) {
   return std::string{};
 }
 
-template <Expression... Expressions>
+export template <Expression... Expressions>
 [[nodiscard]] constexpr auto group_by(Expressions... expressions) {
   return statement<no_group_by_t>{}.group_by(expressions...);
 }

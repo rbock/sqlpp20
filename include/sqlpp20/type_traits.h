@@ -436,7 +436,7 @@ decltype(auto) get_value(const std::optional<T>& t) {
   return t.value();
 }
 
-template <typename T>
+export template <typename T>
 auto has_value(const T& t) -> bool {
   if constexpr (sqlpp::is_optional_v<T>) {
     return t.has_value();

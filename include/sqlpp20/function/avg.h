@@ -40,13 +40,13 @@ struct avg_t {
   using value_type = double;
 };
 
-template <Expression Expr>
+export template <Expression Expr>
 requires(has_numeric_value_v<Expr> and not is_alias_v<Expr> and not is_aggregate_v<Expr>)
 [[nodiscard]] constexpr auto avg(Expr expr) {
   return aggregate_t<avg_t<no_flag_t>, Expr>{expr};
 }
 
-template <Expression Expr>
+export template <Expression Expr>
 requires(has_numeric_value_v<Expr> and not is_alias_v<Expr> and not is_aggregate_v<Expr>)
 [[nodiscard]] constexpr auto avg([[maybe_unused]] distinct_t,
                                  Expr expr) {

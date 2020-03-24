@@ -33,7 +33,7 @@ struct logical_and_t {
   static constexpr auto symbol = " AND ";
 };
 
-template <typename L, typename R>
+export template <typename L, typename R>
 requires(has_boolean_value_v<L>and has_boolean_value_v<R>) constexpr auto
 operator&&(L l, R r) {
   return logical_t<L, logical_and_t, R>{l, r};

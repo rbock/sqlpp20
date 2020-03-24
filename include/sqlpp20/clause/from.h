@@ -47,7 +47,7 @@ struct nodes_of<from_t<Tab>> {
 template <typename Tab>
 constexpr auto clause_tag<from_t<Tab>> = ::std::string_view{"from"};
 
-template <typename Tab, typename Statement>
+export template <typename Tab, typename Statement>
 class clause_base<from_t<Tab>, Statement> {
  public:
   template <typename OtherStatement>
@@ -59,7 +59,7 @@ class clause_base<from_t<Tab>, Statement> {
   Tab _table;
 };
 
-template <typename Context, typename Tab, typename Statement>
+export template <typename Context, typename Tab, typename Statement>
 [[nodiscard]] auto to_sql_string(
     Context& context, const clause_base<from_t<Tab>, Statement>& t) {
   return std::string(" FROM ") + to_sql_string(context, t._table);
@@ -67,7 +67,7 @@ template <typename Context, typename Tab, typename Statement>
 
 struct no_from_t {};
 
-template <typename Statement>
+export template <typename Statement>
 class clause_base<no_from_t, Statement> {
  public:
   template <typename OtherStatement>
@@ -81,13 +81,13 @@ class clause_base<no_from_t, Statement> {
   }
 };
 
-template <typename Context, typename Statement>
+export template <typename Context, typename Statement>
 [[nodiscard]] auto to_sql_string(Context& context,
                                  const clause_base<no_from_t, Statement>&) {
   return std::string{};
 }
 
-template <typename Tab>
+export template <typename Tab>
 [[nodiscard]] constexpr auto from(Tab t) {
   return statement<no_from_t>{}.from(t);
 }

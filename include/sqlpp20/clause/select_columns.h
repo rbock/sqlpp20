@@ -76,7 +76,7 @@ template <typename Context, typename Column>
                                name_tag_of_t<remove_optional_t<Column>>{});
 }
 
-template <typename... Columns, typename Statement>
+export template <typename... Columns, typename Statement>
 class clause_base<select_columns_t<Columns...>, Statement> {
  public:
   template <typename OtherStatement>
@@ -98,7 +98,7 @@ constexpr auto check_clause_preparable(
     const type_t<
         clause_base<select_columns_t<Columns...>, statement<Clauses...>>>& t) {
   constexpr auto known_aggregates =
-      (::sqlpp::type_vector{} + ... + provided_aggregates_of_v<Clauses>);
+      (::sqlpp::make_type_vector() + ... + provided_aggregates_of_v<Clauses>);
 
   constexpr auto all_aggregates =
       (true and ... and
@@ -138,7 +138,7 @@ template <typename Context, typename... Columns, typename Statement>
 
 struct no_select_columns_t {};
 
-template <typename Statement>
+export template <typename Statement>
 class clause_base<no_select_columns_t, Statement> {
  public:
   template <typename OtherStatement>
@@ -167,7 +167,7 @@ template <typename Context, typename Statement>
   return std::string{};
 }
 
-template <typename... Columns>
+export template <typename... Columns>
 requires(sizeof...(Columns) > 0)
 [[nodiscard]] constexpr auto select_columns(Columns... columns) {
   return statement<no_select_columns_t>{}.columns(columns...);

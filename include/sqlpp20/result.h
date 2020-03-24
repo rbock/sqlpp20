@@ -32,7 +32,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 
 namespace sqlpp {
-class result_end_t {};
+export class result_end_t {};
 
 export template <typename ResultHandle>
 struct result_t {

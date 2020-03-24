@@ -28,6 +28,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <sqlpp20/clause_fwd.h>
 #include <sqlpp20/statement.h>
+#include <sqlpp20/type_vector.h>
 #include <sqlpp20/type_traits.h>
 #include <sqlpp20/wrapped_static_assert.h>
 
@@ -47,7 +48,7 @@ struct nodes_of<having_t<Condition>> {
 template <typename Table>
 constexpr auto clause_tag<having_t<Table>> = ::std::string_view{"having"};
 
-template <typename Condition, typename Statement>
+export template <typename Condition, typename Statement>
 class clause_base<having_t<Condition>, Statement> {
  public:
   template <typename OtherStatement>
@@ -66,7 +67,7 @@ template <typename Db, typename Condition, typename... Clauses>
 constexpr auto check_clause_preparable(
     const type_t<clause_base<having_t<Condition>, statement<Clauses...>>>& t) {
   constexpr auto known_aggregates =
-      (::sqlpp::type_vector() + ... + provided_aggregates_of_v<Clauses>);
+      (::sqlpp::make_type_vector() + ... + provided_aggregates_of_v<Clauses>);
 
   if constexpr (not recursive_is_aggregate(known_aggregates,
                                            type_t<Condition>{})) {
@@ -76,7 +77,7 @@ constexpr auto check_clause_preparable(
   }
 }
 
-template <typename Context, typename Condition, typename Statement>
+export template <typename Context, typename Condition, typename Statement>
 [[nodiscard]] auto to_sql_string(
     Context& context, const clause_base<having_t<Condition>, Statement>& t) {
   return std::string(" HAVING ") + to_sql_string(context, t._condition);
@@ -84,7 +85,7 @@ template <typename Context, typename Condition, typename Statement>
 
 struct no_having_t {};
 
-template <typename Statement>
+export template <typename Statement>
 class clause_base<no_having_t, Statement> {
  public:
   template <typename OtherStatement>
@@ -98,13 +99,13 @@ class clause_base<no_having_t, Statement> {
   }
 };
 
-template <typename Context, typename Statement>
+export template <typename Context, typename Statement>
 [[nodiscard]] auto to_sql_string(Context& context,
                                  const clause_base<no_having_t, Statement>&) {
   return std::string{};
 }
 
-template <BooleanExpression Condition>
+export template <BooleanExpression Condition>
 [[nodiscard]] constexpr auto having(Condition&& condition) {
   return statement<no_having_t>{}.having(std::forward<Condition>(condition));
 }

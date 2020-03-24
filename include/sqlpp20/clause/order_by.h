@@ -50,7 +50,7 @@ struct nodes_of<order_by_t<Columns...>> {
 template <typename Table>
 constexpr auto clause_tag<order_by_t<Table>> = ::std::string_view{"order_by"};
 
-template <typename... Columns, typename Statement>
+export template <typename... Columns, typename Statement>
 class clause_base<order_by_t<Columns...>, Statement> {
  public:
   template <typename OtherStatement>
@@ -71,7 +71,7 @@ constexpr auto check_clause_preparable(
     const type_t<clause_base<order_by_t<Columns...>, statement<Clauses...>>>&
         t) {
   constexpr auto known_aggregates =
-      (::sqlpp::type_vector{} + ... + provided_aggregates_of_v<Clauses>);
+      (::sqlpp::make_type_vector() + ... + provided_aggregates_of_v<Clauses>);
 
   if constexpr ((known_aggregates.empty() and ... and
                  recursive_contains_aggregate(
@@ -83,7 +83,7 @@ constexpr auto check_clause_preparable(
   }
 }
 
-template <typename Context, typename... Columns, typename Statement>
+export template <typename Context, typename... Columns, typename Statement>
 [[nodiscard]] auto to_sql_string(
     Context& context, const clause_base<order_by_t<Columns...>, Statement>& t) {
   return std::string{" ORDER BY "} +
@@ -92,7 +92,7 @@ template <typename Context, typename... Columns, typename Statement>
 
 struct no_order_by_t {};
 
-template <typename Statement>
+export template <typename Statement>
 class clause_base<no_order_by_t, Statement> {
  public:
   template <typename OtherStatement>
@@ -107,13 +107,13 @@ class clause_base<no_order_by_t, Statement> {
   }
 };
 
-template <typename Context, typename Statement>
+export template <typename Context, typename Statement>
 [[nodiscard]] auto to_sql_string(
     Context& context, const clause_base<no_order_by_t, Statement>& t) {
   return std::string{};
 }
 
-template <OrderExpression... Expressions>
+export template <OrderExpression... Expressions>
 requires(sizeof...(Expressions) > 0)
 [[nodiscard]] constexpr auto order_by(Expressions&&... expressions) {
   return statement<no_order_by_t>{}.order_by(

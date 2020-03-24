@@ -41,7 +41,7 @@ struct max_t {
   using value_type = ValueType;
 };
 
-template <typename Expr>
+export template <typename Expr>
 requires(not is_alias_v<Expr> and not is_aggregate_v<Expr>)
 [[nodiscard]] constexpr auto max(Expr expr) {
   return aggregate_t<max_t<value_type_of_t<Expr>>, Expr>{expr};

@@ -36,7 +36,7 @@ enum class sort_order {
   desc,
 };
 
-template <typename L>
+export template <typename L>
 struct sort_order_t {
   L l;
   sort_order order;
@@ -47,7 +47,7 @@ struct nodes_of<sort_order_t<L>> {
   using type = type_vector<L>;
 };
 
-template <typename L>
+export template <typename L>
 requires(is_expression_v<L>) constexpr auto asc(L l) -> sort_order_t<L> {
   return sort_order_t<L>{l, sort_order::asc};
 }

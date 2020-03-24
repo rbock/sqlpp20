@@ -33,8 +33,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/wrapped_static_assert.h>
 
 namespace sqlpp {
-struct asterisk_t {};
-inline constexpr auto asterisk = asterisk_t{};
+export struct asterisk_t {};
+export inline constexpr auto asterisk = asterisk_t{};
 
 template <typename Context>
 [[nodiscard]] auto to_sql_string(Context& context, const asterisk_t& t) {
@@ -48,13 +48,13 @@ struct count_t {
   using value_type = int64_t;
 };
 
-template <Expression Expr>
+export template <Expression Expr>
 requires(not is_alias_v<Expr> and not is_aggregate_v<Expr>)
 [[nodiscard]] constexpr auto count(Expr expr) {
     return aggregate_t<count_t<no_flag_t>, Expr>{expr};
 }
 
-template <Expression Expr>
+export template <Expression Expr>
 requires(not is_alias_v<Expr> and not is_aggregate_v<Expr>)
 [[nodiscard]] constexpr auto count([[maybe_unused]] distinct_t,
                                    Expr expr) {
@@ -62,7 +62,7 @@ requires(not is_alias_v<Expr> and not is_aggregate_v<Expr>)
 }
 
 // COUNT does not count NULL unless used with *
-[[nodiscard]] constexpr auto count(asterisk_t star) {
+export [[nodiscard]] constexpr auto count(asterisk_t star) {
     return aggregate_t<count_t<no_flag_t>, asterisk_t>{star};
 }
 

@@ -29,7 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/result_column_base.h>
 
 namespace sqlpp {
-template <typename... ColumnSpecs>
+export template <typename... ColumnSpecs>
 class result_row_t : public result_column_base<ColumnSpecs>... {};
 
 template <typename T>

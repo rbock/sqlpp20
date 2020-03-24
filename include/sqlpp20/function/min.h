@@ -40,7 +40,7 @@ struct min_t {
   using value_type = ValueType;
 };
 
-template <Expression Expr>
+export template <Expression Expr>
 requires(not is_alias_v<Expr> and not is_aggregate_v<Expr>)
 [[nodiscard]] constexpr auto min(Expr expr) {
     return aggregate_t<min_t<value_type_of_t<Expr>>, Expr>{

@@ -29,6 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import sqlpp20;
 
 #include <sqlpp20/name_tag.h>
+#include <optional>
 #include <string_view>
 
 namespace test {
