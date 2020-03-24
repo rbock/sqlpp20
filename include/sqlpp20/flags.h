@@ -27,27 +27,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 namespace sqlpp {
-struct no_flag_t {};
+export struct no_flag_t {};
 
-template <typename Context>
+export template <typename Context>
 [[nodiscard]] auto to_sql_string(Context& context, const no_flag_t& t) {
   return std::string{""};
 }
 
-struct all_t {};
+export struct all_t {};
 
-inline constexpr auto all = all_t{};
+export inline constexpr auto all = all_t{};
 
-template <typename Context>
+export template <typename Context>
 [[nodiscard]] auto to_sql_string(Context& context, const all_t& t) {
   return std::string{"ALL "};
 }
 
-struct distinct_t {};
+export struct distinct_t {};
 
-inline constexpr auto distinct = distinct_t{};
+export inline constexpr auto distinct = distinct_t{};
 
-template <typename Context>
+export template <typename Context>
 [[nodiscard]] auto to_sql_string(Context& context, const distinct_t& t) {
   return std::string{"DISTINCT "};
 }

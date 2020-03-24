@@ -31,7 +31,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/wrapped_static_assert.h>
 
 namespace sqlpp {
-template <typename ValueType, typename NameTag>
+export template <typename ValueType, typename NameTag>
 struct parameter_t {};
 
 template <typename ValueType, typename NameTag>
@@ -49,7 +49,7 @@ struct parameters_of<parameter_t<ValueType, NameTag>> {
   static constexpr auto value = type_vector<parameter_t<ValueType, NameTag>>{};
 };
 
-template <typename ValueType>
+export template <typename ValueType>
 struct unnamed_parameter_t {
   template <Named Tag>
   [[nodiscard]] constexpr auto operator()([[maybe_unused]] Tag) const {
@@ -57,10 +57,10 @@ struct unnamed_parameter_t {
   }
 };
 
-template <typename ValueType>
-static constexpr auto parameter = unnamed_parameter_t<ValueType>{};
+export template <typename ValueType>
+constexpr auto parameter = unnamed_parameter_t<ValueType>{};
 
-template <typename Context, typename ValueType, typename NameTag>
+export template <typename Context, typename ValueType, typename NameTag>
 [[nodiscard]] auto to_sql_string(Context& context,
                                  const parameter_t<ValueType, NameTag>& t) {
   return std::string{"?"};

@@ -33,20 +33,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/wrapped_static_assert.h>
 
 namespace sqlpp {
-template <typename Flag>
+export template <typename Flag>
 struct sum_t {
   static constexpr auto name = std::string_view{"SUM"};
   using flag_type = Flag;
   using value_type = numeric_t;
 };
 
-template <Expression Expr>
+export template <Expression Expr>
 requires(has_numeric_value_v<Expr> and not is_alias_v<Expr> and not is_aggregate_v<Expr>)
 [[nodiscard]] constexpr auto sum(Expr expr) {
     return aggregate_t<sum_t<no_flag_t>, Expr>{expr};
 }
 
-template <Expression Expr>
+export template <Expression Expr>
 requires(has_numeric_value_v<Expr> and not is_alias_v<Expr> and not is_aggregate_v<Expr>)
 [[nodiscard]] constexpr auto sum([[maybe_unused]] distinct_t,
                                  Expr expr) {

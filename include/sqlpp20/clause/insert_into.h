@@ -33,51 +33,51 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/wrapped_static_assert.h>
 
 namespace sqlpp {
-template <typename Table>
+template <typename Tab>
 struct insert_into_t {
-  Table _table;
+  Tab _table;
 };
 
-template <typename Table>
-struct nodes_of<insert_into_t<Table>> {
-  using type = type_vector<Table>;
+template <typename Tab>
+struct nodes_of<insert_into_t<Tab>> {
+  using type = type_vector<Tab>;
 };
 
-template <typename Table>
-constexpr auto clause_tag<insert_into_t<Table>> =
+template <typename Tab>
+constexpr auto clause_tag<insert_into_t<Tab>> =
     ::std::string_view{"insert_into"};
 
-template <typename Table, typename Statement>
-class clause_base<insert_into_t<Table>, Statement> {
+export template <typename Tab, typename Statement>
+class clause_base<insert_into_t<Tab>, Statement> {
  public:
-  using insert_into_table_t = Table;
+  using insert_into_table_t = Tab;
 
   template <typename OtherStatement>
-  clause_base(const clause_base<insert_into_t<Table>, OtherStatement>& s)
+  clause_base(const clause_base<insert_into_t<Tab>, OtherStatement>& s)
       : _table(s._table) {}
 
-  clause_base(Table table) : _table(table) {}
+  clause_base(Tab table) : _table(table) {}
 
-  Table _table;
+  Tab _table;
 };
 
-template <typename Context, typename Table, typename Statement>
+export template <typename Context, typename Tab, typename Statement>
 [[nodiscard]] auto to_sql_string(
-    Context& context, const clause_base<insert_into_t<Table>, Statement>& t) {
+    Context& context, const clause_base<insert_into_t<Tab>, Statement>& t) {
   return std::string("INSERT INTO ") + to_sql_string(context, t._table);
 }
 
-template <typename Table>
-constexpr auto is_result_clause_v<insert_into_t<Table>> = true;
+template <typename Tab>
+constexpr auto is_result_clause_v<insert_into_t<Tab>> = true;
 
-template <typename Table>
-struct clause_result_type<insert_into_t<Table>> {
+template <typename Tab>
+struct clause_result_type<insert_into_t<Tab>> {
   using type = insert_result;
 };
 
-template <PrimaryTable Table>
-[[nodiscard]] constexpr auto insert_into(Table t) {
-    return statement<insert_into_t<Table>>{t}
+export template <PrimaryTable Tab>
+[[nodiscard]] constexpr auto insert_into(Tab t) {
+    return statement<insert_into_t<Tab>>{t}
            << statement<no_insert_values_t>{};
 }
 }  // namespace sqlpp

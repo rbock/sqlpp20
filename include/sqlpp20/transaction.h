@@ -72,9 +72,10 @@ class transaction_t {
   }
 };
 
-template <typename Connection>
+export template <typename Connection>
 auto start_transaction(Connection& connection) {
-  return transaction_t{connection};
+#warning: see https://stackoverflow.com/questions/60827958/should-class-template-argument-deduction-ctad-work-inside-modules
+  return transaction_t<Connection>{connection};
 }
 
 }  // namespace sqlpp

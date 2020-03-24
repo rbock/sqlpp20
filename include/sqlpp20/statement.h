@@ -90,7 +90,7 @@ SQLPP_WRAPPED_STATIC_ASSERT(assert_statement_all_required_tables_are_provided,
 SQLPP_WRAPPED_STATIC_ASSERT(assert_statement_parameters_have_unique_names,
                             "statement parameters must be unique");
 
-template <typename Db, typename... Clauses>
+export template <typename Db, typename... Clauses>
 constexpr auto check_statement_preparable(
     [[maybe_unused]] type_t<statement<Clauses...>> s) {
   using _statement_t = statement<Clauses...>;

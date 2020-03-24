@@ -32,40 +32,40 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/type_traits.h>
 
 namespace sqlpp {
-template <typename Table>
+template <typename Tab>
 struct update_t {
-  Table _table;
+  Tab _table;
 };
 
-template <typename Table>
-struct nodes_of<update_t<Table>> {
-  using type = type_vector<Table>;
+template <typename Tab>
+struct nodes_of<update_t<Tab>> {
+  using type = type_vector<Tab>;
 };
 
-template <typename Table>
-constexpr auto clause_tag<update_t<Table>> = ::std::string_view{"update"};
+template <typename Tab>
+constexpr auto clause_tag<update_t<Tab>> = ::std::string_view{"update"};
 
-template <typename Table, typename Statement>
-class clause_base<update_t<Table>, Statement> {
+export template <typename Tab, typename Statement>
+class clause_base<update_t<Tab>, Statement> {
  public:
   template <typename OtherStatement>
-  clause_base(const clause_base<update_t<Table>, OtherStatement>& s)
+  clause_base(const clause_base<update_t<Tab>, OtherStatement>& s)
       : _table(s._table) {}
 
-  clause_base(Table table) : _table(table) {}
+  clause_base(Tab table) : _table(table) {}
 
-  Table _table;
+  Tab _table;
 };
 
-template <typename Context, typename Table, typename Statement>
+export template <typename Context, typename Tab, typename Statement>
 [[nodiscard]] auto to_sql_string(
-    Context& context, const clause_base<update_t<Table>, Statement>& t) {
+    Context& context, const clause_base<update_t<Tab>, Statement>& t) {
   return std::string("UPDATE ") + to_sql_string(context, t._table);
 }
 
-template <PrimaryTable Table>
-[[nodiscard]] constexpr auto update(Table table) {
-  return statement<update_t<Table>>{table}
+export template <PrimaryTable Tab>
+[[nodiscard]] constexpr auto update(Tab table) {
+  return statement<update_t<Tab>>{table}
          << statement<no_update_set_t, no_where_t>{};
 }
 

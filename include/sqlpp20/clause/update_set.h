@@ -74,7 +74,7 @@ template <typename... Assignments>
 constexpr auto clause_tag<update_set_t<Assignments...>> =
     ::std::string_view{"update_set"};
 
-template <typename... Assignments, typename Statement>
+export template <typename... Assignments, typename Statement>
 class clause_base<update_set_t<Assignments...>, Statement> {
  public:
   template <typename OtherStatement>
@@ -96,7 +96,7 @@ struct clause_result_type<update_set_t<Assignments...>> {
   using type = update_result;
 };
 
-template <typename Context, typename... Assignments, typename Statement>
+export template <typename Context, typename... Assignments, typename Statement>
 [[nodiscard]] auto to_sql_string(
     Context& context,
     const clause_base<update_set_t<Assignments...>, Statement>& t) {
@@ -108,7 +108,7 @@ template <typename Context, typename... Assignments, typename Statement>
 
 struct no_update_set_t {};
 
-template <typename Statement>
+export template <typename Statement>
 class clause_base<no_update_set_t, Statement> {
  public:
   template <typename OtherStatement>
@@ -125,13 +125,13 @@ class clause_base<no_update_set_t, Statement> {
   }
 };
 
-template <typename Context, typename Statement>
+export template <typename Context, typename Statement>
 [[nodiscard]] auto to_sql_string(
     Context& context, const clause_base<no_update_set_t, Statement>&) {
   return std::string{};
 }
 
-template <typename... Assignments>
+export template <typename... Assignments>
 [[nodiscard]] constexpr auto update_set(Assignments&&... assignments) {
   return statement<no_update_set_t>{}.set(
       std::forward<Assignments>(assignments)...);

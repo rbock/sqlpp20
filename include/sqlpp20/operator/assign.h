@@ -30,7 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/type_traits.h>
 
 namespace sqlpp {
-template <typename L, typename R>
+export template <typename L, typename R>
 struct assign_t {
   L column;
   R value;
@@ -42,21 +42,21 @@ struct nodes_of<assign_t<L, R>> {
 };
 
 #warning : Constraint needs to be checked earlier
-template <typename L, typename R>
+export template <typename L, typename R>
 requires((can_be_null_v<L> or not can_be_null_v<R>)and has_text_value_v<L>and
              has_text_value_v<R>) constexpr auto assign(L column, R value)
     -> assign_t<L, R> {
   return assign_t<L, R>{column, value};
 }
 
-template <typename L, typename R>
+export template <typename L, typename R>
 requires((can_be_null_v<L> or not can_be_null_v<R>)and has_numeric_value_v<L>and
              has_numeric_value_v<R>) constexpr auto assign(L column, R value)
     -> assign_t<L, R> {
   return assign_t<L, R>{column, value};
 }
 
-template <typename L, typename R>
+export template <typename L, typename R>
 requires((can_be_null_v<L> or not can_be_null_v<R>)and has_boolean_value_v<L>and
              has_boolean_value_v<R>) constexpr auto assign(L column, R value)
     -> assign_t<L, R> {
@@ -74,7 +74,7 @@ struct column_of<assign_t<L, R>> {
 template <typename L, typename R>
 constexpr auto requires_braces_v<assign_t<L, R>> = true;
 
-template <typename Context, typename L, typename R>
+export template <typename Context, typename L, typename R>
 [[nodiscard]] auto to_sql_string(Context& context, const assign_t<L, R>& t) {
   return to_sql_string(context, t.column) + " = " +
          to_sql_string(context, embrace(t.value));

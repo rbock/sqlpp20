@@ -76,7 +76,7 @@ template <typename... Assignments>
 constexpr auto clause_tag<insert_values_t<Assignments...>> =
     ::std::string_view{"insert_values"};
 
-template <typename Statement, typename... Assignments>
+export template <typename Statement, typename... Assignments>
 class clause_base<insert_values_t<Assignments...>, Statement> {
  public:
   template <typename OtherStatement>
@@ -124,7 +124,7 @@ constexpr auto check_clause_preparable(
   }
 }
 
-template <typename Context, typename Statement, typename... Assignments>
+export template <typename Context, typename Statement, typename... Assignments>
 [[nodiscard]] auto to_sql_string(
     Context& context,
     const clause_base<insert_values_t<Assignments...>, Statement>& t) {
@@ -157,7 +157,7 @@ template <>
 constexpr auto clause_tag<insert_default_values_t> =
     ::std::string_view{"insert_values"};
 
-template <typename Statement>
+export template <typename Statement>
 class clause_base<insert_default_values_t, Statement> {
  public:
   template <typename OtherStatement>
@@ -183,7 +183,7 @@ constexpr auto check_clause_preparable(
   }
 }
 
-template <typename Context, typename Statement>
+export template <typename Context, typename Statement>
 [[nodiscard]] auto to_sql_string(
     Context& context,
     const clause_base<insert_default_values_t, Statement>& t) {
@@ -204,7 +204,7 @@ template <typename... Assignments>
 constexpr auto clause_tag<insert_multi_values_t<Assignments...>> =
     ::std::string_view{"insert_values"};
 
-template <typename Statement, typename... Assignments>
+export template <typename Statement, typename... Assignments>
 class clause_base<insert_multi_values_t<Assignments...>, Statement> {
  public:
   template <typename OtherStatement>
@@ -228,7 +228,7 @@ constexpr auto check_clause_preparable(
 
 // this function assumes that there is something to do
 // the _check if there is at least one row has to be performed elsewhere
-template <typename Context, typename Statement, typename... Assignments>
+export template <typename Context, typename Statement, typename... Assignments>
 [[nodiscard]] auto to_sql_string(
     Context& context,
     const clause_base<insert_multi_values_t<Assignments...>, Statement>& t) {
@@ -266,7 +266,7 @@ template <typename Context, typename Statement, typename... Assignments>
 #warning: check table of assignments before executing query
 struct no_insert_values_t {};
 
-template <typename Statement>
+export template <typename Statement>
 class clause_base<no_insert_values_t, Statement> {
  public:
   template <typename OtherStatement>
@@ -295,7 +295,7 @@ class clause_base<no_insert_values_t, Statement> {
   }
 };
 
-template <typename Context, typename Statement>
+export template <typename Context, typename Statement>
 [[nodiscard]] auto to_sql_string(Context& context,
                                  clause_base<no_insert_values_t, Statement>&) {
   return std::string{};

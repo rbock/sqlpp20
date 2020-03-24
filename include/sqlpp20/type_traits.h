@@ -57,7 +57,7 @@ struct auto_increment_t {};
 template <>
 constexpr auto is_read_only_v<auto_increment_t> = true;
 
-template <typename T>
+export template <typename T>
 struct type_t {};
 
 export template <typename T>

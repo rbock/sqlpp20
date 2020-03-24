@@ -44,7 +44,7 @@ struct nodes_of<truncate_t<Tab>> {
 template <typename Tab>
 constexpr auto clause_tag<truncate_t<Tab>> = ::std::string_view{"truncate"};
 
-template <typename Tab, typename Statement>
+export template <typename Tab, typename Statement>
 class clause_base<truncate_t<Tab>, Statement> {
  public:
   template <typename OtherStatement>
@@ -64,13 +64,13 @@ struct clause_result_type<truncate_t<Tab>> {
   using type = execute_result;
 };
 
-template <typename Context, typename Tab, typename Statement>
+export template <typename Context, typename Tab, typename Statement>
 [[nodiscard]] auto to_sql_string(
     Context& context, const clause_base<truncate_t<Tab>, Statement>& t) {
   return "TRUNCATE " + to_sql_name(context, name_tag_of_t<Tab>{});
 }
 
-template <Table Tab>
+export template <Table Tab>
 requires(not is_read_only_v<Tab>)
 [[nodiscard]] constexpr auto truncate(Tab table) {
     return statement<truncate_t<Tab>>{table};
