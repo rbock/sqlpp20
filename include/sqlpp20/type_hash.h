@@ -38,6 +38,8 @@ constexpr auto djb2_hash(const std::string_view& input) -> std::uint32_t {
   return _hash;
 }
 
+#warning: We should use string literals instead of hashes (no collisions)
+
 // From https://stackoverflow.com/a/35943472/2173029
 template <typename T>
 constexpr auto type_hash() {

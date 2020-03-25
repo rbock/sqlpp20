@@ -43,7 +43,7 @@ requires(
         and not is_a_required_table_missing(provided_tables_of_v<Lhs>, type_t<Lhs>{}) 
         and not is_a_required_table_missing(provided_tables_of_v<Rhs>, type_t<Rhs>{}))
 constexpr auto join_impl(Lhs lhs, Rhs rhs) {
-  return ::sqlpp::conditionless_join_t{lhs, JoinType{}, rhs};
+  return ::sqlpp::conditionless_join_t<Lhs, JoinType, Rhs>{lhs, JoinType{}, rhs};
 }
 }  // namespace detail
 

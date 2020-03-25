@@ -37,7 +37,7 @@ struct multiplies_t {
   static constexpr auto symbol = " * ";
 };
 
-template <typename L, typename R>
+export template <typename L, typename R>
 requires(has_numeric_value_v<L>and has_numeric_value_v<R>) constexpr auto
 operator*(L l, R r) {
   return arithmetic_t<L, multiplies_t, R>{l, r};

@@ -33,7 +33,7 @@ struct logical_not_t {
   static constexpr auto symbol = "NOT ";
 };
 
-template <typename R>
+export template <typename R>
 requires has_boolean_value_v<R> constexpr auto operator!(R r) {
   return logical_t<none_t, logical_not_t, R>{none_t{}, r};
 }

@@ -42,21 +42,21 @@ struct nodes_of<in_t<L, Args...>> {
 };
 
 #warning : This is missing the ability to pass a vector or a select, I think
-template <typename L, typename... Args>
+export template <typename L, typename... Args>
 requires((sizeof...(Args) > 0 and has_text_value_v<L>)and...and
              has_text_value_v<Args>) constexpr auto in(L l, Args... args)
     -> in_t<L, Args...> {
   return in_t<L, Args...>{l, std::tuple{args...}};
 }
 
-template <typename L, typename... Args>
+export template <typename L, typename... Args>
 requires((sizeof...(Args) > 0 and has_numeric_value_v<L>)and...and
              has_numeric_value_v<Args>) constexpr auto in(L l, Args... args)
     -> in_t<L, Args...> {
   return in_t<L, Args...>{l, std::tuple{args...}};
 }
 
-template <typename L, typename... Args>
+export template <typename L, typename... Args>
 requires((sizeof...(Args) > 0 and has_boolean_value_v<L>)and...and
              has_boolean_value_v<Args>) constexpr auto in(L l, Args... args)
     -> in_t<L, Args...> {
@@ -71,7 +71,7 @@ struct value_type_of<in_t<L, Args...>> {
 template <typename L, typename... Args>
 constexpr auto requires_braces_v<in_t<L, Args...>> = true;
 
-template <typename Context, typename L, typename... Args>
+export template <typename Context, typename L, typename... Args>
 [[nodiscard]] auto to_sql_string(Context& context, const in_t<L, Args...>& t) {
   if constexpr (sizeof...(Args) == 1) {
     return to_sql_string(context, embrace(t.l)) + " IN(" +

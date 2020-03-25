@@ -31,7 +31,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/type_traits.h>
 
 namespace sqlpp {
-template <typename... Args>
+export template <typename... Args>
 struct coalesce_t {
   std::tuple<Args...> args;
 };
@@ -41,21 +41,21 @@ struct nodes_of<coalesce_t<Args...>> {
   using type = type_vector<Args...>;
 };
 
-template <typename Arg0, typename... Args>
+export template <typename Arg0, typename... Args>
 requires((sizeof...(Args) != 0 and has_text_value_v<Arg0>)and...and
              has_text_value_v<Args>) constexpr auto coalesce(Arg0 arg0,
                                                              Args... args) {
   return coalesce_t<Arg0, Args...>{std::tuple{arg0, args...}};
 }
 
-template <typename Arg0, typename... Args>
+export template <typename Arg0, typename... Args>
 requires((sizeof...(Args) != 0 and has_numeric_value_v<Arg0>)and...and
              has_numeric_value_v<Args>) constexpr auto coalesce(Arg0 arg0,
                                                                 Args... args) {
   return coalesce_t<Arg0, Args...>{std::tuple{arg0, args...}};
 }
 
-template <typename Arg0, typename... Args>
+export template <typename Arg0, typename... Args>
 requires((sizeof...(Args) != 0 and has_boolean_value_v<Arg0>)and...and
              has_boolean_value_v<Args>) constexpr auto coalesce(Arg0 arg0,
                                                                 Args... args) {
@@ -67,7 +67,7 @@ struct value_type_of<coalesce_t<Arg0, Args...>> {
   using type = value_type_of_t<Arg0>;
 };
 
-template <typename Context, typename... Args>
+export template <typename Context, typename... Args>
 [[nodiscard]] auto to_sql_string(Context& context,
                                  const coalesce_t<Args...>& t) {
   return "COALESCE(" + tuple_to_sql_string(context, ", ", t.args) + ")";

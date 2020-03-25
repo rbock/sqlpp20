@@ -29,11 +29,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/binary.h>
 
 namespace sqlpp {
-struct bit_not_t {
+export struct bit_not_t {
   static constexpr auto symbol = "~";
 };
 
-template <typename R>
+export template <typename R>
 requires(has_integral_value_v<R>) constexpr auto operator~(R r) {
   return binary_t<none_t, bit_not_t, R>{none_t{}, r};
 }

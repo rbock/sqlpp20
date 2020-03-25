@@ -22,6 +22,6 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-foreach(TEST char_sequence_of is_table columns_of type_hash)
+foreach(TEST is_table)
     test_target(${TEST} "traits")
 endforeach()

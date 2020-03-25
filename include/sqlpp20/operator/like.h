@@ -33,7 +33,7 @@ struct like_t {
   static constexpr auto symbol = " LIKE ";
 };
 
-template <typename L, typename R>
+export template <typename L, typename R>
 requires(has_text_value_v<L>and has_text_value_v<R>) constexpr auto like(L l,
                                                                          R r) {
   return comparison_t<L, like_t, R>{l, r};

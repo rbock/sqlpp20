@@ -32,7 +32,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace sqlpp {
 
-template <Table Lhs, typename JoinType, OptionalTable Rhs>
+export template <Table Lhs, typename JoinType, OptionalTable Rhs>
 class conditionless_join_t {
  public:
   constexpr conditionless_join_t(Lhs lhs, JoinType, Rhs rhs)
@@ -47,7 +47,7 @@ class conditionless_join_t {
   }
 
   [[nodiscard]] constexpr auto unconditionally() const {
-    return join_t{_lhs, JoinType{}, _rhs, on_t<unconditional_t>{}};
+    return join_t<Lhs, JoinType, Rhs, on_t<unconditional_t>>{_lhs, JoinType{}, _rhs, on_t<unconditional_t>{}};
   }
 
   Lhs _lhs;

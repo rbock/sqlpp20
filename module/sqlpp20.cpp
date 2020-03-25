@@ -1,5 +1,6 @@
 export module sqlpp20;
 
+#include <sqlpp20/case.h>
 #include <sqlpp20/operator.h>
 #include <sqlpp20/function.h>
 #include <sqlpp20/result.h>

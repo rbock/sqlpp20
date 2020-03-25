@@ -40,7 +40,7 @@ struct nodes_of<is_not_null_t<L>> {
   using type = type_vector<L>;
 };
 
-template <typename L>
+export template <typename L>
 requires(is_expression_v<L>) constexpr auto is_not_null(L l)
     -> is_not_null_t<L> {
   return is_not_null_t<L>{l};
@@ -54,7 +54,7 @@ struct value_type_of<is_not_null_t<L>> {
 template <typename L>
 constexpr auto requires_braces_v<is_not_null_t<L>> = true;
 
-template <typename Context, typename L>
+export template <typename Context, typename L>
 [[nodiscard]] auto to_sql_string(Context& context, const is_not_null_t<L>& t) {
   return to_sql_string(embrace(t.l)) + " IS NOT NULL";
 }

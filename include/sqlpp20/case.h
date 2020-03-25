@@ -33,7 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/wrapped_static_assert.h>
 
 namespace sqlpp {
-template <typename CaseWhenThen, typename Else>
+export template <typename CaseWhenThen, typename Else>
 struct case_when_then_else_t {
   CaseWhenThen _case_when_then;  // one or more when/then combinations
   Else _else;                    // The final else
@@ -44,12 +44,12 @@ struct nodes_of<case_when_then_else_t<CaseWhenThen, Else>> {
   using type = type_vector<CaseWhenThen, Else>;
 };
 
-template <typename Expr>
+export template <typename Expr>
 struct then_t {
   Expr _expr;
 };
 
-template <typename When, typename Then>
+export template <typename When, typename Then>
 struct when_then_t {
   When _when;
   Then _then;

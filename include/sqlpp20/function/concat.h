@@ -32,7 +32,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/wrapped_static_assert.h>
 
 namespace sqlpp {
-template <typename... Args>
+export template <typename... Args>
 struct concat_t {
   std::tuple<Args...> args;
 };
@@ -42,7 +42,7 @@ struct nodes_of<concat_t<Args...>> {
   using type = type_vector<Args...>;
 };
 
-template <typename... Args>
+export template <typename... Args>
 requires((sizeof...(Args) > 1) and ... and
          has_text_value_v<Args>) constexpr auto concat(Args... args) {
   return concat_t<Args...>{std::tuple{args...}};
@@ -56,7 +56,7 @@ struct value_type_of<concat_t<Args...>> {
 template <typename... Args>
 struct requires_braces<concat_t<Args...>> : std::true_type {};
 
-template <typename Context, typename... Args>
+export template <typename Context, typename... Args>
 [[nodiscard]] auto to_sql_string(Context& context, const concat_t<Args...>& t) {
   return tuple_to_sql_string(context, " || ", t.args);
 }

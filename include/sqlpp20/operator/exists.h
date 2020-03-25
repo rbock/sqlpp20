@@ -40,7 +40,8 @@ struct nodes_of<exists_t<SubQuery>> {
   using type = type_vector<SubQuery>;
 };
 
-template <typename SubQuery>
+#warning: Use concept here
+export template <typename SubQuery>
 requires(is_statement_v<SubQuery>and has_result_row_v<
          SubQuery>) constexpr auto exists(SubQuery sub_query)
     -> exists_t<SubQuery> {
@@ -52,7 +53,7 @@ struct value_type_of<exists_t<SubQuery>> {
   using type = bool;
 };
 
-template <typename Context, typename SubQuery>
+export template <typename Context, typename SubQuery>
 [[nodiscard]] auto to_sql_string(Context& context,
                                  const exists_t<SubQuery>& t) {
   return " EXISTS(" + to_sql_string(context, t.sub_query) + ") ";

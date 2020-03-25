@@ -32,40 +32,40 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 SQLPP_CREATE_NAME_TAG(foo);
 
 // non-tables
-static_assert(not sqlpp::is_table(7));
-static_assert(not sqlpp::is_table(test::tabPerson.id));
-static_assert(not sqlpp::is_table(test::tabPerson.id.as(test::tabPerson)));
+static_assert(not sqlpp::Table<int>);
+static_assert(not sqlpp::Table<decltype(test::tabPerson.id)>);
+static_assert(not sqlpp::Table<decltype(test::tabPerson.id.as(test::tabPerson))>);
 
 // unconditional joins
-static_assert(not sqlpp::is_table(test::tabEmpty.join(test::tabPerson)));
-static_assert(not sqlpp::is_table(test::tabEmpty.inner_join(test::tabPerson)));
+static_assert(not sqlpp::Table<decltype(test::tabEmpty.join(test::tabPerson))>);
+static_assert(not sqlpp::Table<decltype(test::tabEmpty.inner_join(test::tabPerson))>);
 static_assert(
-    not sqlpp::is_table(test::tabEmpty.left_outer_join(test::tabPerson)));
+    not sqlpp::Table<decltype(test::tabEmpty.left_outer_join(test::tabPerson))>);
 static_assert(
-    not sqlpp::is_table(test::tabEmpty.right_outer_join(test::tabPerson)));
-static_assert(not sqlpp::is_table(test::tabEmpty.outer_join(test::tabPerson)));
+    not sqlpp::Table<decltype(test::tabEmpty.right_outer_join(test::tabPerson))>);
+static_assert(not sqlpp::Table<decltype(test::tabEmpty.outer_join(test::tabPerson))>);
 
 // raw tables
-static_assert(sqlpp::is_table(test::tabEmpty));
-static_assert(sqlpp::is_table(test::tabPerson));
-static_assert(sqlpp::is_table(test::tabDepartment));
+static_assert(sqlpp::Table<std::decay_t<decltype(test::tabEmpty)>>);
+static_assert(sqlpp::Table<std::decay_t<decltype(test::tabPerson)>>);
+static_assert(sqlpp::Table<std::decay_t<decltype(test::tabDepartment)>>);
 
 // aliased tables
-static_assert(sqlpp::is_table(test::tabDepartment.as(foo)));
-static_assert(sqlpp::is_table(test::tabDepartment.as(test::tabEmpty)));
-static_assert(sqlpp::is_table(test::tabDepartment.as(test::tabPerson.id)));
+static_assert(sqlpp::Table<decltype(test::tabDepartment.as(foo))>);
+static_assert(sqlpp::Table<decltype(test::tabDepartment.as(test::tabEmpty))>);
+static_assert(sqlpp::Table<decltype(test::tabDepartment.as(test::tabPerson.id))>);
 
 // conditional or cross joins
-static_assert(sqlpp::is_table(test::tabEmpty.cross_join(test::tabPerson)));
+static_assert(sqlpp::Table<decltype(test::tabEmpty.cross_join(test::tabPerson))>);
 static_assert(
-    sqlpp::is_table(test::tabEmpty.join(test::tabPerson).unconditionally()));
-static_assert(sqlpp::is_table(
-    test::tabEmpty.inner_join(test::tabPerson).unconditionally()));
-static_assert(sqlpp::is_table(
-    test::tabEmpty.left_outer_join(test::tabPerson).unconditionally()));
-static_assert(sqlpp::is_table(
-    test::tabEmpty.right_outer_join(test::tabPerson).unconditionally()));
-static_assert(sqlpp::is_table(
-    test::tabEmpty.outer_join(test::tabPerson).unconditionally()));
+    sqlpp::Table<decltype(test::tabEmpty.join(test::tabPerson).unconditionally())>);
+static_assert(sqlpp::Table<decltype(
+    test::tabEmpty.inner_join(test::tabPerson).unconditionally())>);
+static_assert(sqlpp::Table<decltype(
+    test::tabEmpty.left_outer_join(test::tabPerson).unconditionally())>);
+static_assert(sqlpp::Table<decltype(
+    test::tabEmpty.right_outer_join(test::tabPerson).unconditionally())>);
+static_assert(sqlpp::Table<decltype(
+    test::tabEmpty.outer_join(test::tabPerson).unconditionally())>);
 
 int main() {}

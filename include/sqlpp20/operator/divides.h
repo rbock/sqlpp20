@@ -33,11 +33,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <type_traits>
 
 namespace sqlpp {
-struct divides_t {
+export struct divides_t {
   static constexpr auto symbol = " / ";
 };
 
-template <typename L, typename R>
+export template <typename L, typename R>
 requires(has_numeric_value_v<L>and has_numeric_value_v<R>) constexpr auto
 operator/(L l, R r) {
   return arithmetic_t<L, divides_t, R>{l, r};

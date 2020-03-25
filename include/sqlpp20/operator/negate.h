@@ -37,7 +37,7 @@ struct negate_t {
   static constexpr auto symbol = "-";
 };
 
-template <typename R>
+export template <typename R>
 requires(has_numeric_value_v<R>) constexpr auto operator-(R r) {
   return arithmetic_t<none_t, negate_t, R>{none_t{}, r};
 }

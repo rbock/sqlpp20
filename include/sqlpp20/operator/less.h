@@ -29,17 +29,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/comparison.h>
 
 namespace sqlpp {
+#warning: Once supported, we could use string literals as template parameters, see https://blog.keha.dev/posts/cpp20-string-literal-template-parameters/
 struct less_t {
   static constexpr auto symbol = " < ";
 };
 
-template <typename L, typename R>
+export template <typename L, typename R>
 requires(has_text_value_v<L>and has_text_value_v<R>) constexpr auto operator<(
     L l, R r) {
   return comparison_t<L, less_t, R>{l, r};
 }
 
-template <typename L, typename R>
+export template <typename L, typename R>
 requires(has_numeric_value_v<L>and has_numeric_value_v<R>) constexpr auto
 operator<(L l, R r) {
   return comparison_t<L, less_t, R>{l, r};

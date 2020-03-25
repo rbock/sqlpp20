@@ -34,7 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <type_traits>
 
 namespace sqlpp {
-template <Expression Expr, Named Tag>
+export template <Expression Expr, Named Tag>
 requires(not is_alias_v<Expr>)
     [[nodiscard]] constexpr auto as(Expr expr, const Tag& tag) {
     return alias_t<Expr, name_tag_of_t<Tag>>{expr};

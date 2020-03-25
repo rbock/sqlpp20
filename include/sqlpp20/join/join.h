@@ -30,7 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/type_traits.h>
 
 namespace sqlpp {
-template <typename Lhs, typename JoinType, typename Rhs, typename Condition>
+export template <typename Lhs, typename JoinType, typename Rhs, typename Condition>
 class join_t : public join_functions<join_t<Lhs, JoinType, Rhs, Condition>> {
  public:
   constexpr join_t(Lhs lhs, JoinType, Rhs rhs, Condition condition)

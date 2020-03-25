@@ -724,7 +724,7 @@ concept Selectable = is_selectable_v<remove_optional_t<T>>;
 template <typename T>
 concept Named = has_name_v<T>;
 
-template <typename T>
+export template <typename T>
 concept Table = is_table_v<T>;
 
 template <typename T>

@@ -29,11 +29,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/binary.h>
 
 namespace sqlpp {
-struct bit_shift_left_t {
+export struct bit_shift_left_t {
   static constexpr auto symbol = " << ";
 };
 
-template <typename L, typename R>
+export template <typename L, typename R>
 requires(has_integral_value_v<L>and has_integral_value_v<R>) constexpr auto
 operator<<(L l, R r) {
   return binary_t<L, bit_shift_left_t, R>{l, r};
