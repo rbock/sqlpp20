@@ -30,7 +30,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/statement.h>
 #include <sqlpp20/tuple_to_sql_string.h>
 #include <sqlpp20/type_traits.h>
-#include <sqlpp20/wrapped_static_assert.h>
 
 #include <tuple>
 
@@ -62,24 +61,20 @@ class clause_base<order_by_t<Columns...>, Statement> {
   std::tuple<Columns...> _columns;
 };
 
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_order_by_args_not_having_aggregates_without_group_by,
-    "order_by() args must not be aggregates if there is no group by");
-
 template <typename Db, typename... Columns, typename... Clauses>
 constexpr auto check_clause_preparable(
-    const type_t<clause_base<order_by_t<Columns...>, statement<Clauses...>>>&
-        t) {
+    const type_t<clause_base<order_by_t<Columns...>, statement<Clauses...>>>& t)
+    -> bool {
   constexpr auto known_aggregates =
       (::sqlpp::make_type_vector() + ... + provided_aggregates_of_v<Clauses>);
 
   if constexpr ((known_aggregates.empty() and ... and
                  recursive_contains_aggregate(
                      known_aggregates, ::sqlpp::type_vector<Columns>{}))) {
-    return failed<
-        assert_order_by_args_not_having_aggregates_without_group_by>{};
+    static_assert(sizeof(t) == 0, "order_by() args must not be aggregates if there is no group by");
+    return false;
   } else {
-    return succeeded{};
+    return true;
   }
 }
 

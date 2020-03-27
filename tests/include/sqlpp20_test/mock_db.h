@@ -99,41 +99,29 @@ class mock_db : public ::sqlpp::connection {
   friend class ::sqlpp::clause_base;
 
  public:
-  template <typename... Clauses>
-  auto operator()(const ::sqlpp::statement<Clauses...>& statement) {
-    using Statement = ::sqlpp::statement<Clauses...>;
-    if constexpr (constexpr auto _check =
-                      check_statement_executable<mock_db>(type_v<Statement>);
-                  _check) {
-      using ResultType = result_type_of_t<Statement>;
-      if constexpr (std::is_same_v<ResultType, insert_result>) {
-        return insert(statement);
-      } else if constexpr (std::is_same_v<ResultType, delete_result>) {
-        return delete_from(statement);
-      } else if constexpr (std::is_same_v<ResultType, update_result>) {
-        return update(statement);
-      } else if constexpr (std::is_same_v<ResultType, select_result>) {
-        return select(statement);
-      } else if constexpr (std::is_same_v<ResultType, execute_result>) {
-        return execute(statement);
-      } else {
-        static_assert(wrong<Statement>, "Unknown statement type");
-      }
+  template <::sqlpp::Statement S>
+  requires(::sqlpp::check_statement_executable<mock_db>(::sqlpp::type_v<S>)) auto operator()(
+      const S& statement) {
+    using ResultType = result_type_of_t<S>;
+    if constexpr (std::is_same_v<ResultType, insert_result>) {
+      return insert(statement);
+    } else if constexpr (std::is_same_v<ResultType, delete_result>) {
+      return delete_from(statement);
+    } else if constexpr (std::is_same_v<ResultType, update_result>) {
+      return update(statement);
+    } else if constexpr (std::is_same_v<ResultType, select_result>) {
+      return select(statement);
+    } else if constexpr (std::is_same_v<ResultType, execute_result>) {
+      return execute(statement);
     } else {
-      return ::sqlpp::bad_expression_t{_check};
+      static_assert(wrong<S>, "Unknown statement type");
     }
   }
 
-  template <typename... Clauses>
-  auto prepare(const ::sqlpp::statement<Clauses...>& statement) {
-    using Statement = ::sqlpp::statement<Clauses...>;
-    if constexpr (constexpr auto _check =
-                      check_statement_preparable<mock_db>(type_v<Statement>);
-                  _check) {
-      return ::sqlpp::test::prepared_statement_t{*this, statement};
-    } else {
-      return ::sqlpp::bad_expression_t{_check};
-    }
+  template <::sqlpp::Statement S>
+  requires(::sqlpp::check_statement_preparable<mock_db>(sqlpp::type_v<S>))
+  auto prepare(const S& statement) {
+    return ::sqlpp::test::prepared_statement_t{*this, statement};
   }
 
   auto start_transaction() -> void {}

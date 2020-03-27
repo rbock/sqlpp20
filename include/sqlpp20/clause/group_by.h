@@ -30,7 +30,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/statement.h>
 #include <sqlpp20/tuple_to_sql_string.h>
 #include <sqlpp20/type_traits.h>
-#include <sqlpp20/wrapped_static_assert.h>
 
 #include <tuple>
 

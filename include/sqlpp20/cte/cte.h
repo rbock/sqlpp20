@@ -31,7 +31,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/result_row.h>
 #include <sqlpp20/table_spec.h>
 #include <sqlpp20/type_traits.h>
-#include <sqlpp20/wrapped_static_assert.h>
 
 namespace sqlpp {
 template <typename TableSpec, typename ResultRow>

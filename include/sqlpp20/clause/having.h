@@ -30,7 +30,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/statement.h>
 #include <sqlpp20/type_vector.h>
 #include <sqlpp20/type_traits.h>
-#include <sqlpp20/wrapped_static_assert.h>
 
 #include <vector>
 
@@ -60,20 +59,20 @@ class clause_base<having_t<Condition>, Statement> {
   Condition _condition;
 };
 
-SQLPP_WRAPPED_STATIC_ASSERT(assert_having_condition_consists_of_aggregates,
-                            "having condition must consist of aggregates");
-
 template <typename Db, typename Condition, typename... Clauses>
 constexpr auto check_clause_preparable(
-    const type_t<clause_base<having_t<Condition>, statement<Clauses...>>>& t) {
+    const type_t<clause_base<having_t<Condition>, statement<Clauses...>>>& t)
+    -> bool {
   constexpr auto known_aggregates =
       (::sqlpp::make_type_vector() + ... + provided_aggregates_of_v<Clauses>);
 
   if constexpr (not recursive_is_aggregate(known_aggregates,
                                            type_t<Condition>{})) {
-    return failed<assert_having_condition_consists_of_aggregates>{};
+    static_assert(sizeof(t) == 0,
+                  "having condition must consist of aggregates");
+    return false;
   } else {
-    return succeeded{};
+    return true;
   }
 }
 

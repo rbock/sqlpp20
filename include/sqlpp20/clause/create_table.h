@@ -29,7 +29,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/clause_fwd.h>
 #include <sqlpp20/statement.h>
 #include <sqlpp20/type_traits.h>
-#include <sqlpp20/wrapped_static_assert.h>
 #include <sqlpp20/wrong.h>
 
 namespace sqlpp {

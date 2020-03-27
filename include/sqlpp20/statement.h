@@ -28,12 +28,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <sqlpp20/algorithm.h>
 #include <sqlpp20/array_unique.h>
-#include <sqlpp20/bad_expression.h>
 #include <sqlpp20/clause_fwd.h>
 #include <sqlpp20/detail/statement_constructor_arg.h>
-#include <sqlpp20/succeeded.h>
 #include <sqlpp20/type_traits.h>
-#include <sqlpp20/wrapped_static_assert.h>
 
 namespace sqlpp {
 template <typename T>
@@ -66,8 +63,8 @@ using result_type_of_t = typename result_type_of<T>::type;
 
 template <typename Db, typename Clause, typename Statement>
 constexpr auto check_clause_preparable(
-    const type_t<clause_base<Clause, Statement>>&) {
-  return succeeded{};
+    const type_t<clause_base<Clause, Statement>>&) -> bool {
+  return true;
 }
 
 namespace detail {
@@ -85,38 +82,35 @@ template <typename... Ts>
 }
 }  // namespace detail
 
-SQLPP_WRAPPED_STATIC_ASSERT(assert_statement_all_required_tables_are_provided,
-                            "statement uses tables that are not provided");
-SQLPP_WRAPPED_STATIC_ASSERT(assert_statement_parameters_have_unique_names,
-                            "statement parameters must be unique");
-
 export template <typename Db, typename... Clauses>
 constexpr auto check_statement_preparable(
-    [[maybe_unused]] type_t<statement<Clauses...>> s) {
+    [[maybe_unused]] type_t<statement<Clauses...>> s) -> bool {
   using _statement_t = statement<Clauses...>;
 
   if constexpr (not detail::have_unique_names(parameters_of_v<_statement_t>)) {
-    return failed<assert_statement_parameters_have_unique_names>{};
+    static_assert(sizeof(s) == 0, "statement uses tables that are not provided");
+    return false;
   } else if constexpr (is_a_required_table_missing(
                            provided_tables_of_v<_statement_t>, s)) {
-    return failed<assert_statement_all_required_tables_are_provided>{};
-  } else
-    return (succeeded{} and ... and
+    static_assert(sizeof(s) == 0, "statement uses tables that are not provided");
+    return false;
+  } else {
+    return (true and ... and
             check_clause_preparable<Db>(
                 type_v<clause_base<Clauses, _statement_t>>));
+  }
 }
-
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_execute_without_parameters,
-    "directly executed statements must have no parameters");
 
 export template <typename Db, typename... Clauses>
 constexpr auto check_statement_executable(
-    const type_t<statement<Clauses...>>& s) {
+    const type_t<statement<Clauses...>>& s) -> bool {
   if constexpr (parameters_of_v<statement<Clauses...>>.size() != 0) {
-    return failed<assert_execute_without_parameters>{};
-  } else
+    static_assert(sizeof(s) == 0,
+                  "directly executed statements must have no parameters");
+    return false;
+  } else {
     return check_statement_preparable<Db>(s);
+  }
 }
 
 export template <typename... Clauses>
@@ -165,16 +159,13 @@ struct result_row_of<statement<Clauses...>> {
                                   statement<Clauses...>>>;
 };
 
-SQLPP_WRAPPED_STATIC_ASSERT(assert_statement_contains_unique_clauses,
-                            "statements must contain unique clauses only");
-
 export template <typename... Clauses>
-constexpr auto check_statement_clauses() {
+constexpr auto unique_statement_clauses() {
   if constexpr (not detail::have_unique_clauses(
                     ::sqlpp::type_vector<Clauses...>{})) {
-    return failed<assert_statement_contains_unique_clauses>{};
+    return false;
   } else
-    return succeeded{};
+    return true;
 }
 
 export template <typename Context, typename... Clauses>
@@ -188,9 +179,8 @@ export template <typename Context, typename... Clauses>
 }
 
 export template <typename... LClauses, typename... RClauses>
+requires(unique_statement_clauses<LClauses..., RClauses...>())
 constexpr auto operator<<(statement<LClauses...> l, statement<RClauses...> r) {
-  constexpr auto _check = check_statement_clauses<LClauses..., RClauses...>();
-  if constexpr (_check) {
     // remove non-clauses from left part
     using clauses_t =
         decltype((type_vector<>{} + ... +
@@ -199,8 +189,5 @@ constexpr auto operator<<(statement<LClauses...> l, statement<RClauses...> r) {
                  type_vector<RClauses...>{});
     return algorithm::copy_t<clauses_t, statement>(
         detail::statement_constructor_arg(l, r));
-  } else {
-    return ::sqlpp::bad_expression_t{_check};
-  }
 }
 }  // namespace sqlpp

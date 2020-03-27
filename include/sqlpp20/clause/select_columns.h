@@ -34,7 +34,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/to_sql_name.h>
 #include <sqlpp20/tuple_to_sql_string.h>
 #include <sqlpp20/type_traits.h>
-#include <sqlpp20/wrapped_static_assert.h>
 
 #include <tuple>
 
@@ -89,10 +88,6 @@ class clause_base<select_columns_t<Columns...>, Statement> {
   std::tuple<select_column_t<Columns>...> _columns;
 };
 
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_selected_columns_all_aggregates_or_none,
-    "selected columns need to be either all aggregates or all non-aggregates");
-
 template <typename Db, typename... Columns, typename... Clauses>
 constexpr auto check_clause_preparable(
     const type_t<
@@ -110,9 +105,10 @@ constexpr auto check_clause_preparable(
                                        ::sqlpp::type_vector<Columns>{}));
 
   if constexpr (not(all_aggregates or no_aggregates)) {
-    return failed<assert_selected_columns_all_aggregates_or_none>{};
+      static_assert(sizeof(t) == 0, "selected columns need to be either all aggregates or all non-aggregates");
+    return false;
   } else {
-    return succeeded{};
+    return true;
   }
 }
 

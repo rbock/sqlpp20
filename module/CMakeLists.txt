@@ -30,7 +30,7 @@ add_custom_command(
     OUTPUT 
         ${SQLPP20_MODULE}
     COMMAND 
-        /usr/local/clang-trunk/bin/clang++ 
+        /usr/local/llvm-trunk/bin/clang++ 
                 -std=c++20 
                 -stdlib=libc++ 
                 -fmodules 

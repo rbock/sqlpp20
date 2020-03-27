@@ -134,14 +134,6 @@ struct clause_result_type {
 template <typename T>
 using clause_result_type_t = typename clause_result_type<T>::type;
 
-template <typename T>
-constexpr auto is_failed_v = false;
-
-template <typename T>
-constexpr auto is_failed(const T&) {
-  return is_failed_v<T>;
-}
-
 inline constexpr auto no_clause_tag = ::std::string_view{"no clause"};
 template <typename T>
 constexpr auto clause_tag = no_clause_tag;
@@ -213,22 +205,6 @@ constexpr auto result_rows_are_compatible_v =
 template <typename Left, typename Right>
 constexpr auto are_union_compatible_v =
     result_rows_are_compatible_v<result_row_of_t<Left>, result_row_of_t<Right>>;
-
-template <typename T>
-constexpr auto is_bad_expression_v = false;
-
-template <typename Assert, typename T>
-constexpr auto is_specific_bad_expression_v = false;
-
-template <typename T>
-constexpr auto is_bad_expression() {
-  return is_bad_expression_v<T>;
-}
-
-template <typename Assert, typename T>
-constexpr auto is_specific_bad_expression() {
-  return is_specific_bad_expression_v<Assert, T>;
-}
 
 template <typename T>
 constexpr auto is_join_v = false;
@@ -703,7 +679,7 @@ template<typename... As>
 constexpr auto unique_assignment_columns_v = unique_types_v<column_of_t<remove_optional_t<As>>...>;
 
 // Concepts
-template <typename T>
+export template <typename T>
 concept Statement = is_statement_v<T>;
 
 template <typename T>

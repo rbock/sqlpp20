@@ -35,7 +35,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/tuple_to_sql_string.h>
 #include <sqlpp20/type_traits.h>
 #include <sqlpp20/type_vector_is_subset_of.h>
-#include <sqlpp20/wrapped_static_assert.h>
 
 #include <tuple>
 #include <vector>
@@ -90,9 +89,6 @@ class clause_base<insert_values_t<Assignments...>, Statement> {
   std::tuple<Assignments...> _assignments;
 };
 
-SQLPP_WRAPPED_STATIC_ASSERT(assert_insert_set_is_not_missing_assignment,
-                            "at least one required column is missing in set()");
-
 namespace detail {
 template <typename... Ls, typename Pred, typename... Rs>
 constexpr auto some_elements_of_L_matching_P_are_not_in_R(
@@ -108,9 +104,10 @@ constexpr auto some_elements_of_L_do_not_match_P(::sqlpp::type_vector<Ls...>,
 }
 }  // namespace detail
 
+#warning: Move to creation of insert values?
 template <typename Db, typename Statement, typename... Assignments>
 constexpr auto check_clause_preparable(
-    const type_t<clause_base<insert_values_t<Assignments...>, Statement>>&) {
+    const type_t<clause_base<insert_values_t<Assignments...>, Statement>>& t) -> bool {
   using _table_t = typename Statement::insert_into_table_t;
   constexpr auto _set_columns =
       type_vector<column_of_t<remove_optional_t<Assignments>>...>{};
@@ -118,9 +115,10 @@ constexpr auto check_clause_preparable(
   if constexpr (::sqlpp::detail::some_elements_of_L_matching_P_are_not_in_R(
                     columns_of_v<_table_t>, ::sqlpp::is_insert_required_pred,
                     _set_columns)) {
-    return failed<assert_insert_set_is_not_missing_assignment>{};
+    static_assert(sizeof(t) == 0, "at least one required column is missing in set()");
+    return false;
   } else {
-    return succeeded{};
+    return true;
   }
 }
 
@@ -166,20 +164,17 @@ class clause_base<insert_default_values_t, Statement> {
   clause_base(const insert_default_values_t& f) {}
 };
 
-SQLPP_WRAPPED_STATIC_ASSERT(
-    assert_default_values_require_all_defaults,
-    "default_values() requires all columns to have a default value");
-
 template <typename Db, typename Statement>
 constexpr auto check_clause_preparable(
-    const type_t<clause_base<insert_default_values_t, Statement>>&) {
+    const type_t<clause_base<insert_default_values_t, Statement>>& t) -> bool {
   using _table_t = typename Statement::insert_into_table_t;
 
   if constexpr (::sqlpp::detail::some_elements_of_L_do_not_match_P(
                     columns_of_v<_table_t>, ::sqlpp::has_default_pred)) {
-    return failed<assert_default_values_require_all_defaults>{};
+    static_assert(sizeof(t) == 0, "default_values() requires all columns to have a default value");
+    return false;
   } else {
-    return succeeded{};
+    return true;
   }
 }
 
