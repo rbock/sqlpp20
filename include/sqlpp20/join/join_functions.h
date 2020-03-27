@@ -33,60 +33,44 @@ namespace sqlpp {
 template <Table Lhs, typename JoinType, OptionalTable Rhs>
 class conditionless_join_t;
 
-namespace detail {
-template <typename JoinType, Table Lhs, OptionalTable Rhs>
-requires(
-        table_names_of_v<Lhs>.is_disjoint_from(table_names_of_v<remove_optional_t<Rhs>>)
-#warning : The next two should be checked when turning a select into a table
-        and not is_a_required_table_missing(provided_tables_of_v<Lhs>, type_t<Lhs>{}) 
-        and not is_a_required_table_missing(provided_tables_of_v<Rhs>, type_t<Rhs>{}))
-constexpr auto join_impl(Lhs lhs, Rhs rhs) {
-  return ::sqlpp::conditionless_join_t<Lhs, JoinType, Rhs>{lhs, JoinType{}, rhs};
-}
-}  // namespace detail
-
+#warning : When turning a SELECT into a temporary table, check for missing required tables
 template <Table Lhs, OptionalTable Rhs>
+requires(table_names_of_v<Lhs>.is_disjoint_from(table_names_of_v<remove_optional_t<Rhs>>))
 [[nodiscard]] constexpr auto inner_join(Lhs lhs, Rhs rhs) {
-  return detail::join_impl<inner_join_t>(lhs, rhs);
+  return ::sqlpp::conditionless_join_t<Lhs, inner_join_t, Rhs>{lhs, rhs};
 }
 
 template <Table Lhs, OptionalTable Rhs>
+requires(table_names_of_v<Lhs>.is_disjoint_from(table_names_of_v<remove_optional_t<Rhs>>))
 [[nodiscard]] constexpr auto join(Lhs lhs, Rhs rhs) {
-  return inner_join(lhs, rhs);
+  return ::sqlpp::conditionless_join_t<Lhs, inner_join_t, Rhs>{lhs, rhs};
 }
 
 template <Table Lhs, OptionalTable Rhs>
+requires(table_names_of_v<Lhs>.is_disjoint_from(table_names_of_v<remove_optional_t<Rhs>>))
 [[nodiscard]] constexpr auto left_outer_join(Lhs lhs, Rhs rhs) {
-  return detail::join_impl<left_outer_join_t>(lhs, rhs);
+  return ::sqlpp::conditionless_join_t<Lhs, outer_join_t, Rhs>{lhs, rhs};
 }
 
 template <Table Lhs, OptionalTable Rhs>
+requires(table_names_of_v<Lhs>.is_disjoint_from(table_names_of_v<remove_optional_t<Rhs>>))
 [[nodiscard]] constexpr auto right_outer_join(Lhs lhs, Rhs rhs) {
-  return detail::join_impl<right_outer_join_t>(lhs, rhs);
+  return ::sqlpp::conditionless_join_t<Lhs, right_outer_join_t, Rhs>{lhs, rhs};
 }
 
 template <Table Lhs, OptionalTable Rhs>
+requires(table_names_of_v<Lhs>.is_disjoint_from(table_names_of_v<remove_optional_t<Rhs>>))
 [[nodiscard]] constexpr auto outer_join(Lhs lhs, Rhs rhs) {
-  return detail::join_impl<outer_join_t>(lhs, rhs);
+  return ::sqlpp::conditionless_join_t<Lhs, left_outer_join_t, Rhs>{lhs, rhs};
 }
 
-namespace detail {
 template <Table Lhs, OptionalTable Rhs>
-requires(
-        table_names_of_v<Lhs>.is_disjoint_from(table_names_of_v<remove_optional_t<Rhs>>) 
-#warning : The next two should be checked when turning a select into a table
-        and not is_a_required_table_missing(provided_tables_of_v<Lhs>, type_t<Lhs>{}) 
-        and not is_a_required_table_missing(provided_tables_of_v<Rhs>, type_t<Rhs>{}))
-constexpr auto cross_join_impl(Lhs lhs, Rhs rhs) {
-    return detail::join_impl<cross_join_t>(lhs, rhs).unconditionally();
-}
-}  // namespace detail
-
-template <Table Lhs, OptionalTable Rhs>
+requires(table_names_of_v<Lhs>.is_disjoint_from(table_names_of_v<remove_optional_t<Rhs>>))
 [[nodiscard]] constexpr auto cross_join(Lhs lhs, Rhs rhs) {
-  return detail::cross_join_impl(lhs, rhs);
+  return ::sqlpp::conditionless_join_t<Lhs, cross_join_t, Rhs>{lhs, rhs}.unconditionally();
 }
 
+#warning: need to move the constraints here to reduce error message length
 export template <typename Derived>
 class join_functions {
   constexpr decltype(auto) ref() const {
@@ -94,34 +78,42 @@ class join_functions {
   }
 
  public:
-  template <OptionalTable T>
-  [[nodiscard]] constexpr auto join(T t) const {
-    return ::sqlpp::join(ref(), t);
+  template <OptionalTable Rhs>
+  requires(table_names_of_v<Derived>.is_disjoint_from(table_names_of_v<remove_optional_t<Rhs>>))
+  [[nodiscard]] constexpr auto join(Rhs rhs) const {
+    return ::sqlpp::conditionless_join_t<Derived, inner_join_t, Rhs>{ref(), rhs};
   }
 
-  template <OptionalTable T>
-  [[nodiscard]] constexpr auto inner_join(T t) const {
-    return ::sqlpp::inner_join(ref(), t);
+  template <OptionalTable Rhs>
+  requires(table_names_of_v<Derived>.is_disjoint_from(table_names_of_v<remove_optional_t<Rhs>>))
+  [[nodiscard]] constexpr auto inner_join(Rhs rhs) const {
+    return ::sqlpp::conditionless_join_t<Derived, inner_join_t, Rhs>{ref(), rhs};
   }
 
-  template <OptionalTable T>
-  [[nodiscard]] constexpr auto left_outer_join(T t) const {
-    return ::sqlpp::left_outer_join(ref(), t);
+  template <OptionalTable Rhs>
+  requires(table_names_of_v<Derived>.is_disjoint_from(table_names_of_v<remove_optional_t<Rhs>>))
+  [[nodiscard]] constexpr auto left_outer_join(Rhs rhs) const {
+    return ::sqlpp::conditionless_join_t<Derived, left_outer_join_t, Rhs>{ref(), rhs};
   }
 
-  template <OptionalTable T>
-  [[nodiscard]] constexpr auto right_outer_join(T t) const {
-    return ::sqlpp::right_outer_join(ref(), t);
+  template <OptionalTable Rhs>
+  requires(table_names_of_v<Derived>.is_disjoint_from(table_names_of_v<remove_optional_t<Rhs>>))
+  [[nodiscard]] constexpr auto right_outer_join(Rhs rhs) const {
+    return ::sqlpp::conditionless_join_t<Derived, right_outer_join_t, Rhs>{ref(),
+                                                                       rhs};
   }
 
-  template <OptionalTable T>
-  [[nodiscard]] constexpr auto outer_join(T t) const {
-    return ::sqlpp::outer_join(ref(), t);
+  template <OptionalTable Rhs>
+  requires(table_names_of_v<Derived>.is_disjoint_from(table_names_of_v<remove_optional_t<Rhs>>))
+  [[nodiscard]] constexpr auto outer_join(Rhs rhs) const {
+    return ::sqlpp::conditionless_join_t<Derived, outer_join_t, Rhs>{ref(), rhs};
   }
 
-  template <OptionalTable T>
-  [[nodiscard]] constexpr auto cross_join(T t) const {
-    return ::sqlpp::cross_join(ref(), t);
+  template <OptionalTable Rhs>
+  requires(table_names_of_v<Derived>.is_disjoint_from(table_names_of_v<remove_optional_t<Rhs>>))
+  [[nodiscard]] constexpr auto cross_join(Rhs rhs) const {
+    return ::sqlpp::conditionless_join_t<Derived, cross_join_t, Rhs>{ref(), rhs}
+        .unconditionally();
   }
 };
 }  // namespace sqlpp

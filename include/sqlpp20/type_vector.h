@@ -32,6 +32,10 @@ struct type_vector {
   [[nodiscard]] static constexpr auto size() { return sizeof...(Elements); }
 
   [[nodiscard]] static constexpr auto empty() { return size() == 0; }
+
+#warning: Need to implement for real
+  template <typename... Es>
+  [[nodiscard]] static constexpr auto is_disjoint_from(type_vector<Es...>) { return true; }
 };
 
 template <typename... Elements>

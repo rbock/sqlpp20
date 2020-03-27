@@ -59,9 +59,4 @@ constexpr auto
     columns_of_v<table_columns<TableSpec, type_vector<ColumnSpecs...>>> =
         type_vector<column_t<TableSpec, ColumnSpecs>...>();
 
-template <typename TableSpec, typename... ColumnSpecs>
-constexpr auto can_be_null_columns_of_v<
-    table_columns<TableSpec, type_vector<ColumnSpecs...>>> =
-    type_set_if<can_be_null, column_t<TableSpec, ColumnSpecs>...>();
-
 }  // namespace sqlpp

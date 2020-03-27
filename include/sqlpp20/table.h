@@ -80,7 +80,7 @@ export template <typename Context, typename TableSpec>
 template <typename TableSpec>
 [[nodiscard]] constexpr auto provided_tables_of([
     [maybe_unused]] type_t<table_t<TableSpec>>) {
-  return type_vector<TableSpec>();
+  return type_vector<TableSpec>{};
 }
 
 template <typename TableSpec>
@@ -88,7 +88,7 @@ constexpr auto is_table_v<table_t<TableSpec>> = true;
 
 template <typename TableSpec>
 constexpr auto table_names_of_v<table_t<TableSpec>> =
-    type_set<char_sequence_of_t<table_t<TableSpec>>>();
+    type_vector<char_sequence_of_t<table_t<TableSpec>>>{};
 
 template <typename TableSpec>
 [[nodiscard]] constexpr auto column_tuple_of(const table_t<TableSpec>& t) {
@@ -104,10 +104,5 @@ template <typename TableSpec>
 template <typename TableSpec>
 constexpr auto columns_of_v<table_t<TableSpec>> =
     columns_of_v<table_columns<TableSpec, typename TableSpec::_columns>>;
-
-template <typename TableSpec>
-constexpr auto can_be_null_columns_of_v<table_t<TableSpec>> =
-    can_be_null_columns_of_v<
-        table_columns<TableSpec, typename TableSpec::_columns>>;
 
 }  // namespace sqlpp

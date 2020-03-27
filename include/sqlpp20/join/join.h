@@ -62,6 +62,7 @@ template <typename Context, typename Lhs, typename JoinType, typename Rhs,
   return ret;
 }
 
+#warning: Need table_names_of here!
 template <typename Lhs, typename JoinType, typename Rhs, typename Condition>
 constexpr auto is_join_v<join_t<Lhs, JoinType, Rhs, Condition>> = true;
 
@@ -71,9 +72,5 @@ constexpr auto is_table_v<join_t<Lhs, JoinType, Rhs, Condition>> = true;
 template <typename Lhs, typename JoinType, typename Rhs, typename Condition>
 constexpr auto columns_of_v<join_t<Lhs, JoinType, Rhs, Condition>> =
     columns_of_v<Lhs> + columns_of_v<Rhs>;
-
-template <typename Lhs, typename JoinType, typename Rhs, typename Condition>
-constexpr auto can_be_null_columns_of_v<join_t<Lhs, JoinType, Rhs, Condition>> =
-    JoinType::template _can_be_null_columns_of<Lhs, Rhs>;
 
 }  // namespace sqlpp

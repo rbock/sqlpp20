@@ -35,7 +35,7 @@ namespace sqlpp {
 export template <Table Lhs, typename JoinType, OptionalTable Rhs>
 class conditionless_join_t {
  public:
-  constexpr conditionless_join_t(Lhs lhs, JoinType, Rhs rhs)
+  constexpr conditionless_join_t(Lhs lhs, Rhs rhs)
       : _lhs(lhs), _rhs(rhs) {}
 
   template <BooleanExpression Expr>

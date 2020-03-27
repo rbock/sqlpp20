@@ -88,23 +88,12 @@ template <typename CteType, typename TableSpec, typename Stat>
   return detail::all_of(static_cast<const _base&>(t));
 }
 
+#warning: we need something like is_a_required_cte_missing (see is_a_required_table_missing)
 template <typename CteType, typename TableSpec, typename Stat>
 [[nodiscard]] constexpr auto provided_tables_of([
     [maybe_unused]] type_t<cte_t<CteType, TableSpec, Stat>>) {
-  return type_vector<TableSpec>();
+  return type_vector<TableSpec>{};
 }
-
-template <typename CteType, typename TableSpec, typename Stat>
-[[nodiscard]] constexpr auto required_tables_of([
-    [maybe_unused]] type_t<cte_t<CteType, TableSpec, Stat>>) {
-  return type_set<>();
-}
-
-template <typename CteType, typename TableSpec, typename Stat>
-[[nodiscard]] constexpr auto required_ctes_of(
-    type_t<cte_t<CteType, TableSpec, Stat>> c) {
-  return provided_tables_of(c);
-};
 
 template <typename CteType, typename TableSpec, typename Stat>
 struct nodes_of<cte_t<CteType, TableSpec, Stat>> {

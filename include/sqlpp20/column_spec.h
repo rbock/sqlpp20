@@ -59,8 +59,9 @@ struct make_column_spec {
 
   static constexpr auto _can_be_null =
       (is_optional_v<Column> or is_optional_v<_value_t> or
-       can_be_null_v<_base_column> or
-       can_be_null_columns_of_v<Statement>.template count<_base_column>());
+       can_be_null_v<_base_column>
+#warning: Or if the table is in an outer join
+      );
 
   using type = column_spec<_name_tag, _base_value_t, _can_be_null>;
 };

@@ -46,15 +46,9 @@ struct nodes_of<with_t<Mode, CommonTableExpressions...>> {
 };
 
 template <with_mode Mode, typename... CommonTableExpressions>
-[[nodiscard]] constexpr auto required_ctes_of([
-    [maybe_unused]] type_t<with_t<Mode, CommonTableExpressions...>>) {
-  return type_set();
-};
-
-template <with_mode Mode, typename... CommonTableExpressions>
 [[nodiscard]] constexpr auto provided_ctes_of([
     [maybe_unused]] type_t<with_t<Mode, CommonTableExpressions...>>) {
-  return (type_set() | ... | provided_ctes_of_v<CommonTableExpressions>);
+  return type_vector<table_spec_of_t<CommonTableExpressions>...>{};
 };
 
 template <with_mode Mode, typename... CommonTableExpressions>

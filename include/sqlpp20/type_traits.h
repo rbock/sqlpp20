@@ -28,7 +28,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <sqlpp20/char_sequence.h>
 #include <sqlpp20/type_hash.h>
-#include <sqlpp20/type_set.h>
 #include <sqlpp20/type_vector.h>
 #include <sqlpp20/unique_types.h>
 #include <sqlpp20/wrong.h>
@@ -559,21 +558,8 @@ template <typename T>
 constexpr auto provided_tables_of_v = provided_tables_of(type_t<T>{});
 
 template <typename... T>
-[[nodiscard]] constexpr auto required_ctes_of(type_vector<T...>) {
-  return (type_set() | ... | required_ctes_of(type_t<T>{}));
-}
-
-template <typename T>
-[[nodiscard]] constexpr auto required_ctes_of(type_t<T>) {
-  return required_ctes_of(nodes_of_t<T>{});
-}
-
-template <typename T>
-constexpr auto required_ctes_of_v = required_ctes_of(type_t<T>{});
-
-template <typename... T>
 [[nodiscard]] constexpr auto provided_ctes_of(type_vector<T...>) {
-  return (type_set() | ... | provided_ctes_of(type_t<T>{}));
+  return (type_vector<>{} + ... + provided_ctes_of(type_t<T>{}));
 }
 
 template <typename T>
@@ -585,15 +571,7 @@ template <typename T>
 constexpr auto provided_ctes_of_v = provided_ctes_of(type_t<T>{});
 
 template <typename T>
-constexpr auto can_be_null_columns_of_v = type_set_t<>();
-
-template <typename T>
-constexpr auto can_be_null_columns_of(const T&) {
-  return can_be_null_columns_of_v<T>;
-}
-
-template <typename T>
-constexpr auto table_names_of_v = type_set<>();
+constexpr auto table_names_of_v = type_vector<>{};
 
 template <typename T>
 constexpr auto table_names_of(const T&) {
@@ -601,7 +579,7 @@ constexpr auto table_names_of(const T&) {
 }
 
 template <typename T>
-constexpr auto columns_of_v = type_set<>();
+constexpr auto columns_of_v = type_vector<>{};
 
 template <typename T>
 constexpr auto columns_of(const T&) {

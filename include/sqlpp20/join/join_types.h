@@ -30,41 +30,52 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace sqlpp {
 struct cross_join_t {
+  /*
   template <typename Lhs, typename Rhs>
   static constexpr auto _can_be_null_columns_of =
       (can_be_null_columns_of_v<Lhs> | can_be_null_columns_of_v<Rhs>);
+      */
 
   static constexpr const char* _name = " CROSS";
 };
 
 struct inner_join_t {
+    /*
   template <typename Lhs, typename Rhs>
   static constexpr auto _can_be_null_columns_of =
       (can_be_null_columns_of_v<Lhs> | can_be_null_columns_of_v<Rhs>);
+      */
 
   static constexpr const char* _name = " INNER";
 };
 
 struct outer_join_t {
+#warning: We need to record the outer tables (see column_specs.h).
+    /*
   template <typename Lhs, typename Rhs>
   static constexpr auto _can_be_null_columns_of = (columns_of_v<Lhs> |
                                                    columns_of_v<Rhs>);
+                                                   */
 
   static constexpr const char* _name = " OUTER";
 };
 
 struct left_outer_join_t {
+    /*
   template <typename Lhs, typename Rhs>
   static constexpr auto _can_be_null_columns_of =
       (can_be_null_columns_of_v<Lhs> | columns_of_v<Rhs>);
+      */
 
   static constexpr const char* _name = " LEFT OUTER";
 };
 
 struct right_outer_join_t {
+    /*
   template <typename Lhs, typename Rhs>
   static constexpr auto _can_be_null_columns_of =
       (columns_of_v<Lhs> | can_be_null_columns_of_v<Rhs>);
+      */
 
   static constexpr const char* _name = " RIGHT OUTER";
 };
