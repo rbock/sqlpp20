@@ -87,6 +87,7 @@ template <typename Context, typename Statement>
   return std::string{};
 }
 
+#warning: allow optional values, too
 export template <typename Value>
 requires(std::is_integral_v<Value>)
 [[nodiscard]] constexpr auto limit(Value&& value) {

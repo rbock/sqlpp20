@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/clause/union.h>
 #include <sqlpp20/column.h>
 #include <sqlpp20/result_row.h>
@@ -62,15 +63,15 @@ struct cte_t : cte_columns_t<TableSpec, result_row_of_t<Stat>> {
 
   cte_t(Stat statement) : _statement(statement) {}
 
-  template <SelectStatement SecondStat>
-  requires(not is_cte_recursive_v<cte_t> and are_union_compatible_v<cte_t, SecondStat>)
+  template <typename SecondStat>
+  requires(::sqlpp::concepts::valid_cte_union_arguments<cte_t, SecondStat>)
   constexpr auto union_all(SecondStat second_statement) {
     auto _union = ::sqlpp::union_all(_statement, second_statement);
     return cte_t<recursive_t, TableSpec, decltype(_union)>(_union);
   }
 
-  template <SelectStatement SecondStat>
-  requires(not is_cte_recursive_v<cte_t> and are_union_compatible_v<cte_t, SecondStat>)
+  template <typename SecondStat>
+  requires(::sqlpp::concepts::valid_cte_union_arguments<cte_t, SecondStat>)
   constexpr auto union_distinct(SecondStat second_statement) {
     auto _union = ::sqlpp::union_distinct(_statement, second_statement);
     return cte_t<recursive_t, TableSpec, decltype(_union)>(_union);

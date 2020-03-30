@@ -104,13 +104,13 @@ class clause_base<no_with_t, Statement> {
 
   constexpr clause_base() = default;
 
-  template <FlatCommonTableExpression... CommonTableExpressions>
+  template <::sqlpp::concepts::flat_common_table_expression... CommonTableExpressions>
   [[nodiscard]] constexpr auto with(CommonTableExpressions... ctes) const {
       return new_statement(
           *this, with_t<with_mode::flat, CommonTableExpressions...>{ctes...});
   }
 
-  template <CommonTableExpression... CommonTableExpressions>
+  template <::sqlpp::concepts::flat_common_table_expression... CommonTableExpressions>
   [[nodiscard]] constexpr auto with_recursive(
       CommonTableExpressions... ctes) const {
       return new_statement(
@@ -125,13 +125,13 @@ export template <typename Context, typename Statement>
   return std::string{};
 }
 
-export template <typename... CommonTableExpressions>
+export template <::sqlpp::concepts::flat_common_table_expression... CommonTableExpressions>
 [[nodiscard]] constexpr auto with(CommonTableExpressions&&... ctes) {
   return statement<no_with_t>{}.with(
       std::forward<CommonTableExpressions...>(ctes...));
 }
 
-export template <typename... CommonTableExpressions>
+export template <::sqlpp::concepts::common_table_expression... CommonTableExpressions>
 [[nodiscard]] constexpr auto with_recursive(CommonTableExpressions&&... ctes) {
   return statement<no_with_t>{}.with_recursive(
       std::forward<CommonTableExpressions...>(ctes...));

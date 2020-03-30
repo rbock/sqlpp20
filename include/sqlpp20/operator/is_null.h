@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/to_sql_string.h>
 #include <sqlpp20/type_traits.h>
 
@@ -40,8 +41,8 @@ struct nodes_of<is_null_t<L>> {
   using type = type_vector<L>;
 };
 
-export template <typename L>
-requires(is_expression_v<L>) constexpr auto is_null(L l) -> is_null_t<L> {
+export template <::sqlpp::concepts::expression L>
+constexpr auto is_null(L l) -> is_null_t<L> {
   return is_null_t<L>{l};
 }
 

@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/comparison.h>
 
 namespace sqlpp {
@@ -34,19 +35,8 @@ struct not_equal_to_t {
 };
 
 export template <typename L, typename R>
-requires(has_text_value_v<L>and has_text_value_v<R>) constexpr auto operator!=(
-    L l, R r) {
-  return comparison_t<L, not_equal_to_t, R>{l, r};
-}
-
-export template <typename L, typename R>
-requires(has_numeric_value_v<L>and has_numeric_value_v<R>) constexpr auto
-operator!=(L l, R r) {
-  return comparison_t<L, not_equal_to_t, R>{l, r};
-}
-
-export template <typename L, typename R>
-requires(has_boolean_value_v<L>and has_boolean_value_v<R>) constexpr auto
+requires(::sqlpp::concepts::valid_comparison_arguments<L, R>)
+constexpr auto
 operator!=(L l, R r) {
   return comparison_t<L, not_equal_to_t, R>{l, r};
 }

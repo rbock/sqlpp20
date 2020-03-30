@@ -102,14 +102,14 @@ class clause_base<no_union_t, BaseStatement> {
 
   constexpr clause_base() = default;
 
-  template <SelectStatement RightSelect>
-  requires(are_union_compatible_v<BaseStatement, RightSelect> and provided_ctes_of_v<RightSelect>.empty())
+  template <typename RightSelect>
+  requires(::sqlpp::concepts::valid_union_arguments<BaseStatement, RightSelect>)
   [[nodiscard]] constexpr auto union_all(RightSelect rhs) const {
     return union_all(statement_of(*this), rhs);
   }
 
-  template <SelectStatement RightSelect>
-  requires(are_union_compatible_v<BaseStatement, RightSelect> and provided_ctes_of_v<RightSelect>.empty())
+  template <typename RightSelect>
+  requires(::sqlpp::concepts::valid_union_arguments<BaseStatement, RightSelect>)
   [[nodiscard]] constexpr auto union_distinct(RightSelect rhs) const {
     return union_distinct(statement_of(*this), rhs);
   }
@@ -121,14 +121,14 @@ template <typename Context, typename BaseStatement>
   return std::string{};
 }
 
-template <SelectStatement LeftSelect, SelectStatement RightSelect>
+template <typename LeftSelect, typename RightSelect>
 requires(are_union_compatible_v<LeftSelect, RightSelect> and provided_ctes_of_v<RightSelect>.empty())
 [[nodiscard]] constexpr auto union_all(LeftSelect l, RightSelect r) {
   using u = union_t<all_t, LeftSelect, RightSelect>;
   return statement<u>{detail::statement_constructor_arg(u{all, l, r})};
 }
 
-template <SelectStatement LeftSelect, SelectStatement RightSelect>
+template <typename LeftSelect, typename RightSelect>
 requires(are_union_compatible_v<LeftSelect, RightSelect> and provided_ctes_of_v<RightSelect>.empty())
 [[nodiscard]] constexpr auto union_distinct(LeftSelect l, RightSelect r) {
   using u = union_t<distinct_t, LeftSelect, RightSelect>;

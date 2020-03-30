@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/aggregate.h>
 #include <sqlpp20/flags.h>
 #include <sqlpp20/type_traits.h>
@@ -38,14 +39,12 @@ struct sum_t {
   using value_type = numeric_t;
 };
 
-export template <Expression Expr>
-requires(has_numeric_value_v<Expr> and not is_alias_v<Expr> and not is_aggregate_v<Expr>)
+export template <::sqlpp::concepts::numeric_aggregate_argument Expr>
 [[nodiscard]] constexpr auto sum(Expr expr) {
     return aggregate_t<sum_t<no_flag_t>, Expr>{expr};
 }
 
-export template <Expression Expr>
-requires(has_numeric_value_v<Expr> and not is_alias_v<Expr> and not is_aggregate_v<Expr>)
+export template <::sqlpp::concepts::numeric_aggregate_argument Expr>
 [[nodiscard]] constexpr auto sum([[maybe_unused]] distinct_t,
                                  Expr expr) {
     return aggregate_t<sum_t<distinct_t>, Expr>{expr};

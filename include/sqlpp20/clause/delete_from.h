@@ -70,8 +70,8 @@ export template <typename Context, typename Tab, typename Statement>
   return std::string{"DELETE FROM "} + to_sql_string(context, t._table);
 }
 
-export template <PrimaryTable Tab>
+export template <::sqlpp::concepts::mutable_table Tab>
 [[nodiscard]] constexpr auto delete_from(Tab tab) {
-    return statement<delete_from_t<Tab>>{tab} << statement<no_where_t>{};
+  return statement<delete_from_t<Tab>>{tab} << statement<no_where_t>{};
 }
 }  // namespace sqlpp

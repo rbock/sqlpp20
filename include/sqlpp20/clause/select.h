@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/clause/from.h>
 #include <sqlpp20/clause/group_by.h>
 #include <sqlpp20/clause/having.h>
@@ -70,17 +71,17 @@ export [[nodiscard]] constexpr auto select() {
 
 // select with at least one argument will either create flags or columns
 
-export template <SelectFlag... Fs>
+export template <::sqlpp::concepts::select_flag... Fs>
 [[nodiscard]] constexpr auto select(Fs... fs) {
     return ::sqlpp::select().flags(fs...);
 }
 
-export template <Selectable... Fs>
+export template <::sqlpp::concepts::select_expression... Fs>
 [[nodiscard]] constexpr auto select(Fs... fs) {
     return ::sqlpp::select().columns(fs...);
 }
 
-export template <Selectable F, Selectable... Fs>
+export template <::sqlpp::concepts::select_expression F, ::sqlpp::concepts::select_expression... Fs>
 [[nodiscard]] constexpr auto select(std::tuple<F, Fs...> fs) {
   return ::sqlpp::select().columns(fs);
 }

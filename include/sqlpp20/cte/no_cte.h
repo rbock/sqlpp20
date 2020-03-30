@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/cte/cte.h>
 #include <sqlpp20/statement.h>
 
@@ -33,15 +34,14 @@ namespace sqlpp {
 export template <typename NameTag>
 struct cte_alias_t {
  public:
-  template <Statement Stat>
-  requires(provided_ctes_of_v<Stat>.empty())
+  template <::sqlpp::concepts::cte_statement Stat>
   [[nodiscard]] constexpr auto as(Stat s) const {
     return cte_t<flat_t, table_spec<NameTag, type_hash<Stat>()>, Stat>{s};
   }
 };
 
-export template <Named NameTag>
-[[nodiscard]] constexpr auto cte([[maybe_unused]] NameTag) {
-  return cte_alias_t<name_tag_of_t<NameTag>>{};
+export template <::sqlpp::concepts::alias Alias>
+[[nodiscard]] constexpr auto cte([[maybe_unused]] Alias) {
+  return cte_alias_t<name_tag_of_t<Alias>>{};
 }
 }  // namespace sqlpp

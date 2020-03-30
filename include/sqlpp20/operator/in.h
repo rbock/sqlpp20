@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/to_sql_string.h>
 #include <sqlpp20/type_traits.h>
 
@@ -43,22 +44,8 @@ struct nodes_of<in_t<L, Args...>> {
 
 #warning : This is missing the ability to pass a vector or a select, I think
 export template <typename L, typename... Args>
-requires((sizeof...(Args) > 0 and has_text_value_v<L>)and...and
-             has_text_value_v<Args>) constexpr auto in(L l, Args... args)
-    -> in_t<L, Args...> {
-  return in_t<L, Args...>{l, std::tuple{args...}};
-}
-
-export template <typename L, typename... Args>
-requires((sizeof...(Args) > 0 and has_numeric_value_v<L>)and...and
-             has_numeric_value_v<Args>) constexpr auto in(L l, Args... args)
-    -> in_t<L, Args...> {
-  return in_t<L, Args...>{l, std::tuple{args...}};
-}
-
-export template <typename L, typename... Args>
-requires((sizeof...(Args) > 0 and has_boolean_value_v<L>)and...and
-             has_boolean_value_v<Args>) constexpr auto in(L l, Args... args)
+requires(::sqlpp::concepts::valid_in_arguments<L, Args>)
+constexpr auto in(L l, Args... args)
     -> in_t<L, Args...> {
   return in_t<L, Args...>{l, std::tuple{args...}};
 }

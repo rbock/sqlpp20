@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/clause_fwd.h>
 #include <sqlpp20/column_spec.h>
 #include <sqlpp20/result.h>
@@ -143,14 +144,14 @@ class clause_base<no_select_columns_t, Statement> {
 
   constexpr clause_base() = default;
 
-  template <Selectable... Columns>
+  template <::sqlpp::concepts::select_expression... Columns>
   requires(sizeof...(Columns) > 0)
   [[nodiscard]] constexpr auto columns(Columns... columns) const {
       return new_statement(
           *this, select_columns_t<Columns...>{std::tuple(columns...)});
   }
 
-  template <Selectable... Columns>
+  template <::sqlpp::concepts::select_expression... Columns>
   requires(sizeof...(Columns) > 0)
   [[nodiscard]] constexpr auto columns(std::tuple<Columns...> columns) const {
       return new_statement(*this, select_columns_t<Columns...>{columns});
@@ -163,7 +164,8 @@ template <typename Context, typename Statement>
   return std::string{};
 }
 
-export template <typename... Columns>
+#warning: Add the tuple variant (see above)? Check if really needed for `all_of(tab_sample)`
+export template <::sqlpp::concepts::select_expression... Columns>
 requires(sizeof...(Columns) > 0)
 [[nodiscard]] constexpr auto select_columns(Columns... columns) {
   return statement<no_select_columns_t>{}.columns(columns...);

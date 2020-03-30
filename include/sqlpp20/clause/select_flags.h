@@ -79,7 +79,7 @@ class clause_base<no_select_flags_t, Statement> {
 
   constexpr clause_base() = default;
 
-  template <SelectFlag... Flags>
+  template <::sqlpp::concepts::select_flag... Flags>
   [[nodiscard]] constexpr auto flags(Flags... flags) const {
       return new_statement(*this,
                            select_flags_t<Flags...>{std::tuple(flags...)});
@@ -92,7 +92,7 @@ template <typename Context, typename Statement>
   return std::string{};
 }
 
-template <SelectFlag... Flags>
+template <::sqlpp::concepts::select_flag... Flags>
 [[nodiscard]] constexpr auto select_flags(Flags... flags) {
   return statement<no_select_flags_t>{}.flags(flags...);
 }

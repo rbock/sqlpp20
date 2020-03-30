@@ -26,48 +26,54 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/alias.h>
 #include <sqlpp20/operator.h>
 #include <sqlpp20/to_sql_name.h>
-#include <sqlpp20/type_traits.h>
+#include <sqlpp20/concepts.h>
 
 namespace sqlpp {
-export template <typename TableSpec, typename ColumnSpec>
+export template <::sqlpp::concepts::table_spec TableSpec,
+                 ::sqlpp::concepts::column_spec ColumnSpec>
 class column_t {
-  static_assert(std::is_base_of_v<::sqlpp::spec_base, TableSpec>);
-  static_assert(std::is_base_of_v<::sqlpp::spec_base, ColumnSpec>);
-
  public:
   template <typename T>
+  requires (::sqlpp::concepts::valid_assignment_arguments<column_t, T>)
   [[nodiscard]] auto operator=(T t) const {
-    return assign(*this, t);
+      return ::sqlpp::assign(*this, t);
   }
 
   template <typename Alias>
+  requires (::sqlpp::concepts::valid_as_arguments<column_t, Alias>)
   [[nodiscard]] constexpr auto as(const Alias& alias) const {
     return ::sqlpp::as(*this, alias);
   }
 
   template <typename Pattern>
+  requires (::sqlpp::concepts::valid_like_arguments<column_t, Pattern>)
   [[nodiscard]] constexpr auto like(Pattern pattern) const {
     return ::sqlpp::like(*this, pattern);
   }
 
   template <typename... Exprs>
+  requires (sizeof...(Exprs) and (::sqlpp::concepts::valid_in_arguments<column_t, Exprs> and ...))
   [[nodiscard]] constexpr auto in(Exprs... exprs) const {
     return ::sqlpp::in(*this, exprs...);
   }
 
   template <typename... Exprs>
+  requires (sizeof...(Exprs) and (::sqlpp::concepts::valid_in_arguments<column_t, Exprs> and ...))
   [[nodiscard]] constexpr auto not_in(Exprs... exprs) const {
     return ::sqlpp::not_in(*this, exprs...);
   }
 
-  [[nodiscard]] constexpr auto is_null() const {
+  [[nodiscard]] constexpr auto is_null() const 
+  {
     return ::sqlpp::is_null(*this);
   }
 
-  [[nodiscard]] constexpr auto is_not_null() const {
+  [[nodiscard]] constexpr auto is_not_null() const 
+  {
     return ::sqlpp::is_not_null(*this);
   }
 

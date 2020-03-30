@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/to_sql_string.h>
 #include <sqlpp20/type_traits.h>
 
@@ -41,8 +42,7 @@ struct nodes_of<concat_t<Args...>> {
 };
 
 export template <typename... Args>
-requires((sizeof...(Args) > 1) and ... and
-         has_text_value_v<Args>) constexpr auto concat(Args... args) {
+requires(::sqlpp::concepts::valid_concat_arguments<Args...>) [[nodiscard]] constexpr auto concat(Args...args) {
   return concat_t<Args...>{std::tuple{args...}};
 }
 

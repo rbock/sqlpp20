@@ -55,6 +55,7 @@ struct value_type_of<value_t<Expression>> {
   using type = Expression;
 };
 
+#warning: Use std concept here
 template <typename Expression>
 requires(std::is_arithmetic_v<Expression>)
     [[nodiscard]] constexpr auto value(Expression expression) {

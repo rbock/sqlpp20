@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/clause/update_set.h>
 #include <sqlpp20/clause/where.h>
 #include <sqlpp20/clause_fwd.h>
@@ -63,7 +64,7 @@ export template <typename Context, typename Tab, typename Statement>
   return std::string("UPDATE ") + to_sql_string(context, t._table);
 }
 
-export template <PrimaryTable Tab>
+export template <::sqlpp::concepts::mutable_table Tab>
 [[nodiscard]] constexpr auto update(Tab table) {
   return statement<update_t<Tab>>{table}
          << statement<no_update_set_t, no_where_t>{};

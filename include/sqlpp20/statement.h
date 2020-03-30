@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/algorithm.h>
 #include <sqlpp20/array_unique.h>
 #include <sqlpp20/clause_fwd.h>
@@ -178,8 +179,9 @@ export template <typename Context, typename... Clauses>
           static_cast<const clause_base<Clauses, statement<Clauses...>>&>(t)));
 }
 
+#warning: RHS should be a clause, not a statement
 export template <typename... LClauses, typename... RClauses>
-requires(unique_statement_clauses<LClauses..., RClauses...>())
+requires(::sqlpp::concepts::unique_clauses<LClauses..., RClauses...>)
 constexpr auto operator<<(statement<LClauses...> l, statement<RClauses...> r) {
     // remove non-clauses from left part
     using clauses_t =

@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/to_sql_string.h>
 #include <sqlpp20/type_traits.h>
 
@@ -40,10 +41,8 @@ struct nodes_of<exists_t<SubQuery>> {
   using type = type_vector<SubQuery>;
 };
 
-#warning: Use concept here
-export template <typename SubQuery>
-requires(is_statement_v<SubQuery>and has_result_row_v<
-         SubQuery>) constexpr auto exists(SubQuery sub_query)
+export template <::sqlpp::concepts::select_statement SubQuery>
+constexpr auto exists(SubQuery sub_query)
     -> exists_t<SubQuery> {
   return exists_t<SubQuery>{sub_query};
 }

@@ -26,22 +26,21 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/join/join.h>
 #include <sqlpp20/join/on.h>
 #include <sqlpp20/unconditional.h>
 
 namespace sqlpp {
 
-export template <Table Lhs, typename JoinType, OptionalTable Rhs>
+export template <typename Lhs, typename JoinType, typename Rhs>
 class conditionless_join_t {
  public:
   constexpr conditionless_join_t(Lhs lhs, Rhs rhs)
       : _lhs(lhs), _rhs(rhs) {}
 
-  template <BooleanExpression Expr>
-  requires(not is_a_required_table_missing(
-                           provided_tables_of_v<conditionless_join_t>,
-                           type_t<Expr>{}))
+  template <typename Expr>
+  requires(::sqlpp::concepts::valid_join_condition<conditionless_join_t, Expr>)
   [[nodiscard]] constexpr auto on(const Expr& expr) const {
     return join_t{_lhs, JoinType{}, _rhs, on_t<Expr>{expr}};
   }
@@ -63,6 +62,7 @@ template <typename Lhs, typename JoinType, typename Rhs>
 constexpr auto
     is_conditionless_join_v<conditionless_join_t<Lhs, JoinType, Rhs>> = true;
 
+#warning: Do we need columns_of?
 template <typename Lhs, typename JoinType, typename Rhs>
 constexpr auto columns_of_v<conditionless_join_t<Lhs, JoinType, Rhs>> =
     columns_of_v<Lhs> + columns_of_v<Rhs>;

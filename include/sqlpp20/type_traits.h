@@ -657,6 +657,7 @@ template<typename... As>
 constexpr auto unique_assignment_columns_v = unique_types_v<column_of_t<remove_optional_t<As>>...>;
 
 // Concepts
+/*
 export template <typename T>
 concept Statement = is_statement_v<T>;
 
@@ -704,5 +705,6 @@ concept FlatCommonTableExpression = is_cte_v<T> and not is_cte_recursive_v<T>;
 
 template <typename T>
 concept CommonTableExpression = is_cte_v<T>;
+*/
 
 }  // namespace sqlpp

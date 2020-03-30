@@ -74,7 +74,7 @@ class clause_base<no_from_t, Statement> {
 
   constexpr clause_base() = default;
 
-  template <Table Tab>
+  template <::sqlpp::concepts::table Tab>
   [[nodiscard]] constexpr auto from(Tab t) const {
       return new_statement(*this, from_t<Tab>{t});
   }

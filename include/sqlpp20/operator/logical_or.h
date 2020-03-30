@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/logical.h>
 
 namespace sqlpp {
@@ -33,9 +34,9 @@ export struct logical_or_t {
   static constexpr auto symbol = " OR ";
 };
 
-export template <typename L, typename R>
-requires(has_boolean_value_v<L>and has_boolean_value_v<R>) constexpr auto
-operator||(L l, R r) {
+export template <::sqlpp::concepts::boolean_expression L,
+                 ::sqlpp::concepts::boolean_expression R>
+constexpr auto operator||(L l, R r) {
   return logical_t<L, logical_or_t, R>{l, r};
 }
 

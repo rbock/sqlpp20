@@ -99,7 +99,7 @@ class mock_db : public ::sqlpp::connection {
   friend class ::sqlpp::clause_base;
 
  public:
-  template <::sqlpp::Statement S>
+  template <::sqlpp::concepts::statement S>
   requires(::sqlpp::check_statement_executable<mock_db>(::sqlpp::type_v<S>)) auto operator()(
       const S& statement) {
     using ResultType = result_type_of_t<S>;
@@ -118,7 +118,7 @@ class mock_db : public ::sqlpp::connection {
     }
   }
 
-  template <::sqlpp::Statement S>
+  template <::sqlpp::concepts::statement S>
   requires(::sqlpp::check_statement_preparable<mock_db>(sqlpp::type_v<S>))
   auto prepare(const S& statement) {
     return ::sqlpp::test::prepared_statement_t{*this, statement};

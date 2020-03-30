@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/clause_fwd.h>
 #include <sqlpp20/default_value.h>
 #include <sqlpp20/detail/first.h>
@@ -275,15 +276,15 @@ class clause_base<no_insert_values_t, Statement> {
     return new_statement(*this, insert_default_values_t{});
   }
 
-  template <OptionalInsertAssignment... Assignments>
-  requires(sizeof...(Assignments) > 0 and unique_assignment_columns_v<Assignments...>)
+  template <typename... Assignments>
+  requires(sqlpp::concepts::valid_insert_assignments<Assignments>)
   [[nodiscard]] constexpr auto set(Assignments... as) const {
     using row_t = std::tuple<Assignments...>;
     return new_statement(*this, insert_values_t<Assignments...>{row_t{as...}});
   }
 
-  template <OptionalInsertAssignment... Assignments>
-  requires(sizeof...(Assignments) > 0 and unique_assignment_columns_v<Assignments...>)
+  template <typename... Assignments>
+  requires(sqlpp::concepts::valid_insert_assignments<Assignments>)
   [[nodiscard]] constexpr auto multiset(
       std::vector<std::tuple<Assignments...>> assignments) const {
     return new_statement(*this, insert_multi_values_t<Assignments...>{assignments});

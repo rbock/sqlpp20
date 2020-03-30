@@ -27,10 +27,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <sqlpp20/to_sql_name.h>
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/type_traits.h>
 
 namespace sqlpp {
-template <typename TableSpec, typename ColumnSpec>
+export template <::sqlpp::concepts::table_spec TableSpec,
+                 ::sqlpp::concepts::column_spec ColumnSpec>
 class column_t;
 
 // free as in "without a table"

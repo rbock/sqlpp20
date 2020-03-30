@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/comparison.h>
 
 namespace sqlpp {
@@ -34,8 +35,8 @@ struct like_t {
 };
 
 export template <typename L, typename R>
-requires(has_text_value_v<L>and has_text_value_v<R>) constexpr auto like(L l,
-                                                                         R r) {
+requires(::sqlpp::concepts::valid_like_arguments<L, R>)
+constexpr auto like(L l, R r) {
   return comparison_t<L, like_t, R>{l, r};
 }
 

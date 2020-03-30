@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/clause_fwd.h>
 #include <sqlpp20/free_column.h>
 #include <sqlpp20/statement.h>
@@ -116,8 +117,8 @@ class clause_base<no_update_set_t, Statement> {
 
   constexpr clause_base() = default;
 
-  template <OptionalAssignment... Assignments>
-  requires(sizeof...(Assignments) > 0 and unique_assignment_columns_v<Assignments...>)
+  template <typename... Assignments>
+  requires(::sqlpp::concepts::valid_update_assignments<Assignments...>)
   [[nodiscard]] constexpr auto set(Assignments... assignments) const {
     return new_statement(
         *this, update_set_t<Assignments...>{std::tuple{assignments...}});
@@ -131,6 +132,7 @@ export template <typename Context, typename Statement>
 }
 
 export template <typename... Assignments>
+requires(::sqlpp::concepts::valid_update_assignments<Assignments...>)
 [[nodiscard]] constexpr auto update_set(Assignments&&... assignments) {
   return statement<no_update_set_t>{}.set(
       std::forward<Assignments>(assignments)...);

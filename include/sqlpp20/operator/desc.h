@@ -26,11 +26,12 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/operator/asc.h>
 
 namespace sqlpp {
-export template <typename L>
-requires(is_expression_v<L>) constexpr auto desc(L l) -> sort_order_t<L> {
+export template <::sqlpp::concepts::expression L>
+constexpr auto desc(L l) -> sort_order_t<L> {
   return sort_order_t<L>{l, sort_order::desc};
 }
 

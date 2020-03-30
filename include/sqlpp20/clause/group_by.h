@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/clause_fwd.h>
 #include <sqlpp20/statement.h>
 #include <sqlpp20/tuple_to_sql_string.h>
@@ -82,10 +83,8 @@ class clause_base<no_group_by_t, Statement> {
 
   constexpr clause_base() = default;
 
-  template <Expression... Expressions>
-  requires(sizeof...(Expressions) > 0 
-           and not recursive_contains_aggregate(type_vector<>{},
-                                                type_vector<Expressions...>{}))
+  template <::sqlpp::concepts::group_by_expression... Expressions>
+  requires(sizeof...(Expressions) > 0 )
   [[nodiscard]] constexpr auto group_by(Expressions... expressions) const {
     return new_statement(*this,
                          group_by_t<Expressions...>{std::tuple(expressions...)});
@@ -98,7 +97,8 @@ export template <typename Context, typename Statement>
   return std::string{};
 }
 
-export template <Expression... Expressions>
+export template <::sqlpp::concepts::group_by_expression... Expressions>
+requires(sizeof...(Expressions) > 0 )
 [[nodiscard]] constexpr auto group_by(Expressions... expressions) {
   return statement<no_group_by_t>{}.group_by(expressions...);
 }

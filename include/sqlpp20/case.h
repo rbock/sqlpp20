@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/embrace.h>
 #include <sqlpp20/tuple_to_sql_string.h>
 #include <sqlpp20/type_traits.h>
@@ -63,8 +64,7 @@ struct case_when_then_t {
   std::tuple<WhenThens...> _when_thens;
 
   template <typename When, typename Then>
-  requires(has_boolean_value_v<When> and std::is_same_v<value_type_of_t<case_when_then_t>,
-                                          value_type_of_t<Then>>)
+  requires(::sqlpp::concepts::valid_case_when_then_arguments<case_when_then_t, When, Then>)
   [[nodiscard]] constexpr auto when(When when, then_t<Then> then) const {
     auto _wt = when_then_t<When, Then>{when, then._expr};
     return case_when_then_t<WhenThens..., decltype(_wt)>{
@@ -72,7 +72,7 @@ struct case_when_then_t {
   }
 
   template <typename Else>
-  requires(std::is_same_v<value_type_of_t<case_when_then_t>, value_type_of_t<Else>>)
+  requires(::sqlpp::concepts::valid_case_else_arguments<case_when_then_t, Else>)
   [[nodiscard]] constexpr auto else_(Else els) const {
     return case_when_then_else_t<case_when_then_t, Else>{*this, els};
   }
@@ -114,13 +114,13 @@ export template <typename Context, typename CaseWhenThen, typename Else>
          to_sql_string(context, embrace(t._else));
 }
 
-export template <Expression Then>
+export template <::sqlpp::concepts::expression Then>
 [[nodiscard]] constexpr auto then(Then expr) {
     return then_t<Then>{expr};
 }
 
-export template <typename When, Expression Then>
-requires(has_boolean_value_v<When>)
+export template <typename When, typename Then>
+requires(::sqlpp::concepts::valid_when_then_arguments<When, Then>)
 [[nodiscard]] constexpr auto case_when(When when, then_t<Then> then) {
     auto wt = when_then_t<When, Then>{when, then._expr};
     return case_when_then_t<decltype(wt)>{std::tuple{wt}};

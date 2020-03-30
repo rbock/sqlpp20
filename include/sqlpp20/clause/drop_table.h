@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/clause/from.h>
 #include <sqlpp20/clause/where.h>
 #include <sqlpp20/clause_fwd.h>
@@ -34,49 +35,48 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sqlpp20/wrong.h>
 
 namespace sqlpp {
-template <typename Tab>
+template <typename Table>
 struct drop_table_t {
-  Tab _table;
+  Table _table;
 };
 
-template <typename Tab>
-struct nodes_of<drop_table_t<Tab>> {
-  using type = type_vector<Tab>;
+template <typename Table>
+struct nodes_of<drop_table_t<Table>> {
+  using type = type_vector<Table>;
 };
 
-template <typename Tab>
-constexpr auto clause_tag<drop_table_t<Tab>> =
+template <typename Table>
+constexpr auto clause_tag<drop_table_t<Table>> =
     ::std::string_view{"drop_table"};
 
-template <typename Tab, typename Statement>
-class clause_base<drop_table_t<Tab>, Statement> {
+template <typename Table, typename Statement>
+class clause_base<drop_table_t<Table>, Statement> {
  public:
   template <typename OtherStatement>
-  clause_base(const clause_base<drop_table_t<Tab>, OtherStatement>& t)
+  clause_base(const clause_base<drop_table_t<Table>, OtherStatement>& t)
       : _table(t.table) {}
 
-  clause_base(Tab table) : _table(table) {}
+  clause_base(Table table) : _table(table) {}
 
-  Tab _table;
+  Table _table;
 };
 
-template <typename Tab>
-constexpr auto is_result_clause_v<drop_table_t<Tab>> = true;
+template <typename Table>
+constexpr auto is_result_clause_v<drop_table_t<Table>> = true;
 
-template <typename Tab>
-struct clause_result_type<drop_table_t<Tab>> {
+template <typename Table>
+struct clause_result_type<drop_table_t<Table>> {
   using type = execute_result;
 };
 
-template <typename Context, typename Tab, typename Statement>
+template <typename Context, typename Table, typename Statement>
 [[nodiscard]] auto to_sql_string(
-    Context& context, const clause_base<drop_table_t<Tab>, Statement>& t) {
+    Context& context, const clause_base<drop_table_t<Table>, Statement>& t) {
   return std::string("DROP TABLE IF EXISTS ") + to_sql_name(context, t._table);
 }
 
-template <Table Tab>
-requires(not is_read_only_v<Tab>)
-[[nodiscard]] constexpr auto drop_table(Tab table) {
-  return statement<drop_table_t<Tab>>{table};
+template <::sqlpp::concepts::mutable_table Table>
+[[nodiscard]] constexpr auto drop_table(Table table) {
+  return statement<drop_table_t<Table>>{table};
 }
 }  // namespace sqlpp

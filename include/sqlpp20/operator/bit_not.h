@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/binary.h>
 
 namespace sqlpp {
@@ -33,8 +34,8 @@ export struct bit_not_t {
   static constexpr auto symbol = "~";
 };
 
-export template <typename R>
-requires(has_integral_value_v<R>) constexpr auto operator~(R r) {
+export template <::sqlpp::concepts::integral_expression R>
+constexpr auto operator~(R r) {
   return binary_t<none_t, bit_not_t, R>{none_t{}, r};
 }
 

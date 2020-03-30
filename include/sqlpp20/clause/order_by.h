@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/clause_fwd.h>
 #include <sqlpp20/statement.h>
 #include <sqlpp20/tuple_to_sql_string.h>
@@ -95,7 +96,7 @@ class clause_base<no_order_by_t, Statement> {
 
   constexpr clause_base() = default;
 
-  template <OrderExpression... Expressions>
+  template <::sqlpp::concepts::order_expression... Expressions>
   requires(sizeof...(Expressions) > 0)
   [[nodiscard]] constexpr auto order_by(Expressions... expressions) const {
     return new_statement(*this, order_by_t{std::tuple{expressions...}});
@@ -108,7 +109,7 @@ export template <typename Context, typename Statement>
   return std::string{};
 }
 
-export template <OrderExpression... Expressions>
+export template <::sqlpp::concepts::order_expression... Expressions>
 requires(sizeof...(Expressions) > 0)
 [[nodiscard]] constexpr auto order_by(Expressions&&... expressions) {
   return statement<no_order_by_t>{}.order_by(

@@ -41,25 +41,10 @@ struct nodes_of<coalesce_t<Args...>> {
   using type = type_vector<Args...>;
 };
 
-export template <typename Arg0, typename... Args>
-requires((sizeof...(Args) != 0 and has_text_value_v<Arg0>)and...and
-             has_text_value_v<Args>) constexpr auto coalesce(Arg0 arg0,
-                                                             Args... args) {
-  return coalesce_t<Arg0, Args...>{std::tuple{arg0, args...}};
-}
-
-export template <typename Arg0, typename... Args>
-requires((sizeof...(Args) != 0 and has_numeric_value_v<Arg0>)and...and
-             has_numeric_value_v<Args>) constexpr auto coalesce(Arg0 arg0,
-                                                                Args... args) {
-  return coalesce_t<Arg0, Args...>{std::tuple{arg0, args...}};
-}
-
-export template <typename Arg0, typename... Args>
-requires((sizeof...(Args) != 0 and has_boolean_value_v<Arg0>)and...and
-             has_boolean_value_v<Args>) constexpr auto coalesce(Arg0 arg0,
-                                                                Args... args) {
-  return coalesce_t<Arg0, Args...>{std::tuple{arg0, args...}};
+export template <typename... Args>
+requires(::sqlpp::concepts::valid_coalesce_arguments<Args...>)
+    [[nodiscard]] constexpr auto coalesce(Args... args) {
+  return coalesce_t<Args...>{std::tuple{args...}};
 }
 
 template <typename Arg0, typename... Args>

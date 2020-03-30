@@ -26,16 +26,17 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/alias.h>
 #include <sqlpp20/to_sql_string.h>
 
 #include <type_traits>
 
 namespace sqlpp {
-export template <Expression Expr, Named Tag>
-requires(not is_alias_v<Expr>)
-    [[nodiscard]] constexpr auto as(Expr expr, const Tag& tag) {
-    return alias_t<Expr, name_tag_of_t<Tag>>{expr};
+export template <typename Expr, typename Alias>
+requires(::sqlpp::concepts::valid_as_arguments<Expr, Alias>)
+    [[nodiscard]] constexpr auto as(Expr expr, const Alias& alias) {
+    return alias_t<Expr, name_tag_of_t<Alias>>{expr};
 }
 
 }  // namespace sqlpp

@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/arithmetic.h>
 #include <sqlpp20/to_sql_string.h>
 #include <sqlpp20/type_traits.h>
@@ -37,8 +38,8 @@ struct negate_t {
   static constexpr auto symbol = "-";
 };
 
-export template <typename R>
-requires(has_numeric_value_v<R>) constexpr auto operator-(R r) {
+export template <::sqlpp::concepts::numeric_expression R>
+constexpr auto operator-(R r) {
   return arithmetic_t<none_t, negate_t, R>{none_t{}, r};
 }
 

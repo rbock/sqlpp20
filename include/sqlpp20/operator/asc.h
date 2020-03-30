@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/to_sql_string.h>
 
 #include <type_traits>
@@ -47,8 +48,8 @@ struct nodes_of<sort_order_t<L>> {
   using type = type_vector<L>;
 };
 
-export template <typename L>
-requires(is_expression_v<L>) constexpr auto asc(L l) -> sort_order_t<L> {
+export template <::sqlpp::concepts::expression L>
+constexpr auto asc(L l) -> sort_order_t<L> {
   return sort_order_t<L>{l, sort_order::asc};
 }
 

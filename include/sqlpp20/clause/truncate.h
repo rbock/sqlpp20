@@ -26,52 +26,52 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/clause_fwd.h>
 #include <sqlpp20/statement.h>
 #include <sqlpp20/type_traits.h>
 #include <sqlpp20/wrong.h>
 
 namespace sqlpp {
-template <typename Tab>
+template <typename Table>
 struct truncate_t {};
 
-template <typename Tab>
-struct nodes_of<truncate_t<Tab>> {
-  using type = type_vector<Tab>;
+template <typename Table>
+struct nodes_of<truncate_t<Table>> {
+  using type = type_vector<Table>;
 };
 
-template <typename Tab>
-constexpr auto clause_tag<truncate_t<Tab>> = ::std::string_view{"truncate"};
+template <typename Table>
+constexpr auto clause_tag<truncate_t<Table>> = ::std::string_view{"truncate"};
 
-export template <typename Tab, typename Statement>
-class clause_base<truncate_t<Tab>, Statement> {
+export template <typename Table, typename Statement>
+class clause_base<truncate_t<Table>, Statement> {
  public:
   template <typename OtherStatement>
-  clause_base(const clause_base<truncate_t<Tab>, OtherStatement>& t)
+  clause_base(const clause_base<truncate_t<Table>, OtherStatement>& t)
       : _table(t.table) {}
 
-  clause_base(Tab table) : _table(table) {}
+  clause_base(Table table) : _table(table) {}
 
-  Tab _table;
+  Table _table;
 };
 
-template <typename Tab>
-constexpr auto is_result_clause_v<truncate_t<Tab>> = true;
+template <typename Table>
+constexpr auto is_result_clause_v<truncate_t<Table>> = true;
 
-template <typename Tab>
-struct clause_result_type<truncate_t<Tab>> {
+template <typename Table>
+struct clause_result_type<truncate_t<Table>> {
   using type = execute_result;
 };
 
-export template <typename Context, typename Tab, typename Statement>
+export template <typename Context, typename Table, typename Statement>
 [[nodiscard]] auto to_sql_string(
-    Context& context, const clause_base<truncate_t<Tab>, Statement>& t) {
-  return "TRUNCATE " + to_sql_name(context, name_tag_of_t<Tab>{});
+    Context& context, const clause_base<truncate_t<Table>, Statement>& t) {
+  return "TRUNCATE " + to_sql_name(context, name_tag_of_t<Table>{});
 }
 
-export template <Table Tab>
-requires(not is_read_only_v<Tab>)
-[[nodiscard]] constexpr auto truncate(Tab table) {
-    return statement<truncate_t<Tab>>{table};
+export template <::sqlpp::concepts::mutable_table Table>
+[[nodiscard]] constexpr auto truncate(Table table) {
+    return statement<truncate_t<Table>>{table};
 }
 }  // namespace sqlpp

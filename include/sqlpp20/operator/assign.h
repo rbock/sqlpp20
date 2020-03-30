@@ -41,24 +41,9 @@ struct nodes_of<assign_t<L, R>> {
   using type = type_vector<L, R>;
 };
 
-#warning : Constraint needs to be checked earlier
 export template <typename L, typename R>
-requires((can_be_null_v<L> or not can_be_null_v<R>)and has_text_value_v<L>and
-             has_text_value_v<R>) constexpr auto assign(L column, R value)
-    -> assign_t<L, R> {
-  return assign_t<L, R>{column, value};
-}
-
-export template <typename L, typename R>
-requires((can_be_null_v<L> or not can_be_null_v<R>)and has_numeric_value_v<L>and
-             has_numeric_value_v<R>) constexpr auto assign(L column, R value)
-    -> assign_t<L, R> {
-  return assign_t<L, R>{column, value};
-}
-
-export template <typename L, typename R>
-requires((can_be_null_v<L> or not can_be_null_v<R>)and has_boolean_value_v<L>and
-             has_boolean_value_v<R>) constexpr auto assign(L column, R value)
+requires(::sqlpp::concepts::valid_assignment_arguments<L, R>)
+constexpr auto assign(L column, R value)
     -> assign_t<L, R> {
   return assign_t<L, R>{column, value};
 }

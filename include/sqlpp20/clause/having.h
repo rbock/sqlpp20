@@ -92,7 +92,7 @@ class clause_base<no_having_t, Statement> {
 
   constexpr clause_base() = default;
 
-  template <BooleanExpression Condition>
+  template <::sqlpp::concepts::boolean_expression Condition>
   [[nodiscard]] constexpr auto having(Condition condition) const {
     return new_statement(*this, having_t<Condition>{condition});
   }
@@ -104,7 +104,7 @@ export template <typename Context, typename Statement>
   return std::string{};
 }
 
-export template <BooleanExpression Condition>
+export template <::sqlpp::concepts::boolean_expression Condition>
 [[nodiscard]] constexpr auto having(Condition&& condition) {
   return statement<no_having_t>{}.having(std::forward<Condition>(condition));
 }

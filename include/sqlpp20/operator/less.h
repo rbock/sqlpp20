@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/comparison.h>
 
 namespace sqlpp {
@@ -35,7 +36,8 @@ struct less_t {
 };
 
 export template <typename L, typename R>
-requires(has_text_value_v<L>and has_text_value_v<R>) constexpr auto operator<(
+requires(::sqlpp::concepts::valid_comparison_arguments<L, R>)
+constexpr auto operator<(
     L l, R r) {
   return comparison_t<L, less_t, R>{l, r};
 }

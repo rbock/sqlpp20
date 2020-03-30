@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/arithmetic.h>
 #include <sqlpp20/to_sql_string.h>
 #include <sqlpp20/type_traits.h>
@@ -35,9 +36,9 @@ export struct modulus_t {
   static constexpr auto symbol = " % ";
 };
 
-export template <typename L, typename R>
-requires(has_integral_value_v<L>and has_integral_value_v<R>) constexpr auto
-operator%(L l, R r) {
+export template <::sqlpp::concepts::integral_expression L,
+                 ::sqlpp::concepts::integral_expression R>
+constexpr auto operator%(L l, R r) {
   return arithmetic_t<L, modulus_t, R>{l, r};
 }
 }  // namespace sqlpp

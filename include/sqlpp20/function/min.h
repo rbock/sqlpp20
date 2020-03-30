@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/aggregate.h>
 #include <sqlpp20/flags.h>
 #include <sqlpp20/type_traits.h>
@@ -38,8 +39,7 @@ struct min_t {
   using value_type = ValueType;
 };
 
-export template <Expression Expr>
-requires(not is_alias_v<Expr> and not is_aggregate_v<Expr>)
+export template <::sqlpp::concepts::aggregate_argument Expr>
 [[nodiscard]] constexpr auto min(Expr expr) {
     return aggregate_t<min_t<value_type_of_t<Expr>>, Expr>{
         expr};

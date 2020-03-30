@@ -49,7 +49,7 @@ struct parameters_of<parameter_t<ValueType, NameTag>> {
 
 export template <typename ValueType>
 struct unnamed_parameter_t {
-  template <Named Tag>
+  template <::sqlpp::concepts::alias Tag>
   [[nodiscard]] constexpr auto operator()([[maybe_unused]] Tag) const {
     return parameter_t<ValueType, name_tag_of_t<Tag>>{};
   }

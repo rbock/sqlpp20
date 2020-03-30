@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/clause_fwd.h>
 #include <sqlpp20/statement.h>
 #include <sqlpp20/type_traits.h>
@@ -97,9 +98,7 @@ class clause_base<no_where_t, Statement> {
     return new_statement(*this, unconditionally_t{});
   }
 
-  template <BooleanExpression Condition>
-  requires(not recursive_contains_aggregate(type_vector<>{},
-                                            type_t<Condition>{}))
+  template <::sqlpp::concepts::where_condition Condition>
   [[nodiscard]] constexpr auto where(Condition condition) const {
     return new_statement(*this, where_t<Condition>{condition});
   }
@@ -111,7 +110,7 @@ export template <typename Context, typename Statement>
   return std::string{};
 }
 
-export template <typename Condition>
+export template <::sqlpp::concepts::where_condition Condition>
 [[nodiscard]] constexpr auto where(Condition&& condition) {
   return statement<no_where_t>{}.where(std::forward<Condition>(condition));
 }

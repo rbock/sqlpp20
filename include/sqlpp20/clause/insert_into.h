@@ -26,6 +26,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <sqlpp20/concepts.h>
 #include <sqlpp20/clause/insert_values.h>
 #include <sqlpp20/clause_fwd.h>
 #include <sqlpp20/statement.h>
@@ -74,7 +75,7 @@ struct clause_result_type<insert_into_t<Tab>> {
   using type = insert_result;
 };
 
-export template <PrimaryTable Tab>
+export template <::sqlpp::concepts::mutable_table Tab>
 [[nodiscard]] constexpr auto insert_into(Tab t) {
     return statement<insert_into_t<Tab>>{t}
            << statement<no_insert_values_t>{};
